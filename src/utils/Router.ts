@@ -115,15 +115,14 @@ export class Router {
         const isSuccess = statusCode >= 200 && statusCode < 300;
         
         let responsePayload: any = {
-            success: isSuccess,
+            status: isSuccess ? 'success' : 'error',
             message: data?.message || (isSuccess ? 'Success' : 'Error'),
-            data: null,
-            error: null
+            data: null
         };
 
         if (isSuccess) {
             // Check if data is already wrapped in our structured format to avoid double wrapping
-            if (data && data.success !== undefined && data.message !== undefined && data.data !== undefined) {
+            if (data && data.status !== undefined && data.message !== undefined) {
                  responsePayload = data;
             } else if (data && data.message && Object.keys(data).length === 1) {
                  // Skip wrapping if it's just a {message: "..."} payload and keep data null
@@ -135,7 +134,14 @@ export class Router {
                  }
             }
         } else {
-             responsePayload.error = data;
+            // For errors, if data is an object but NOT just a message, put it in data
+            if (data && typeof data === 'object' && Object.keys(data).some(k => k !== 'message')) {
+                const errorData = { ...data };
+                delete errorData.message;
+                if (Object.keys(errorData).length > 0) {
+                    responsePayload.data = errorData;
+                }
+            }
         }
 
         res.end(JSON.stringify(responsePayload));

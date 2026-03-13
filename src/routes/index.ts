@@ -10,8 +10,13 @@ import adminBrandController from '../controllers/adminBrandController';
 import adminSupplierController from '../controllers/adminSupplierController';
 import adminProductController from '../controllers/adminProductController';
 import adminFileController from '../controllers/adminFileController';
+import userController from '../controllers/userController';
+import adminBannerController from '../controllers/adminBannerController';
+import stockTransactionController from '../controllers/stockTransactionController';
+import reportController from '../controllers/reportController';
 
 import publicPromotionController from '../controllers/publicPromotionController';
+import publicBannerController from '../controllers/publicBannerController';
 
 const appRouter = new Router();
 
@@ -21,6 +26,7 @@ productController(appRouter);
 cartController(appRouter);
 orderController(appRouter);
 publicPromotionController(appRouter);
+publicBannerController(appRouter);
 
 // Admin Controllers import
 adminCategoryController(appRouter);
@@ -28,6 +34,10 @@ adminBrandController(appRouter);
 adminSupplierController(appRouter);
 adminProductController(appRouter);
 adminFileController(appRouter);
+userController(appRouter);
+adminBannerController(appRouter);
+stockTransactionController(appRouter);
+reportController(appRouter);
 
 // Swagger definition
 appRouter.get('/api-docs.json', async (req, res) => {
@@ -64,7 +74,7 @@ appRouter.get('/api-docs', async (req, res) => {
         </script>
     </body>
     </html>`;
-    
+
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(html);
 });
