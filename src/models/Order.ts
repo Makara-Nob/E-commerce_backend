@@ -27,7 +27,9 @@ export interface IOrder extends Document<string> {
     discountAmount: number;
     netAmount: number;
     status: 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
-    paymentMethod: 'CASH' | 'CARD';
+    paymentMethod: 'CASH' | 'CARD' | 'ABA_PAYWAY';
+    paywayTranId?: string;
+    paywayStatus?: string;
     shippingAddress: string;
     note?: string;
     items: IOrderItem[];
@@ -45,7 +47,9 @@ const orderSchema = new Schema<IOrder>({
         enum: ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'],
         default: 'PENDING'
     },
-    paymentMethod: { type: String, enum: ['CASH', 'CARD'], default: 'CASH' },
+    paymentMethod: { type: String, enum: ['CASH', 'CARD', 'ABA_PAYWAY'], default: 'CASH' },
+    paywayTranId: { type: String, unique: true, sparse: true },
+    paywayStatus: { type: String },
     shippingAddress: { type: String, required: true },
     note: String,
     items: [orderItemSchema]

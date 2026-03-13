@@ -4,6 +4,8 @@ import { Product } from '../models/Product';
 import { protect } from '../utils/authPlugin';
 import { Router } from '../utils/Router';
 import { IncomingMessage, ServerResponse } from 'http';
+import { getCheckoutPayload, verifyWebhookHash, ABA_PAYWAY_API_URL } from '../utils/abaPayway';
+import User from '../models/User';
 
 export default function(appRouter: Router) {
 
@@ -96,6 +98,15 @@ appRouter.post('/api/v1/orders', async (req: IncomingMessage, res: ServerRespons
         const discountAmount = 0; // Can implement coupons later
         const netAmount = totalAmount - discountAmount;
 
+        let paywayTranId;
+        if (paymentMethod === 'ABA_PAYWAY') {
+             const dt = new Date();
+             const randomStr = Math.floor(100000 + Math.random() * 900000).toString();
+             paywayTranId = dt.getFullYear().toString() + 
+                 (dt.getMonth() + 1).toString().padStart(2, '0') + 
+                 dt.getDate().toString().padStart(2, '0') + randomStr;
+        }
+
         const order = await Order.create({
             userId,
             totalAmount,
@@ -105,7 +116,8 @@ appRouter.post('/api/v1/orders', async (req: IncomingMessage, res: ServerRespons
             paymentMethod: paymentMethod || 'CASH',
             shippingAddress,
             note,
-            items: orderItems
+            items: orderItems,
+            ...(paywayTranId && { paywayTranId })
         });
 
         // 4. Clear the cart
@@ -115,7 +127,38 @@ appRouter.post('/api/v1/orders', async (req: IncomingMessage, res: ServerRespons
         // Also clear cart items to keep DB clean
         await CartItem.deleteMany({ cartId: cart.id });
 
-        appRouter.sendResponse(res, 201, order);
+        let responseData: any = order.toObject ? order.toObject() : order;
+        
+        if (paymentMethod === 'ABA_PAYWAY') {
+             const user = await User.findById(userId);
+             const fallbackNames = user && user.fullName ? user.fullName.split(' ') : ['Customer', ''];
+             const firstname = fallbackNames[0];
+             const lastname = fallbackNames.slice(1).join(' ') || '';
+             const email = user ? user.email : '';
+
+             // In a real application we would populate the actual product names for the items
+             // Since we only have ids here without full product object, we will use generic names
+             // Actually, we fetched the product earlier in the loop, but we only saved its id.
+             const paywayItems = orderItems.map((i: any) => ({ name: `Product_${i.product}`, quantity: i.quantity, price: parseFloat(i.unitPrice).toFixed(2) }));
+
+             const paywayPayload = getCheckoutPayload({
+                 tran_id: paywayTranId,
+                 amount: netAmount,
+                 items: paywayItems,
+                 firstname,
+                 lastname,
+                 email,
+                 phone: ''
+             });
+             
+             responseData = {
+                 order: responseData,
+                 paywayPayload,
+                 paywayApiUrl: ABA_PAYWAY_API_URL
+             };
+        }
+
+        appRouter.sendResponse(res, 201, responseData);
     } catch (e) {
         appRouter.sendResponse(res, 500, { message: 'Server Error' });
     }
@@ -210,6 +253,82 @@ appRouter.get('/api/v1/orders/:id', async (req: IncomingMessage & { params?: any
         }
     } catch (e) {
         appRouter.sendResponse(res, 500, { message: 'Server Error' });
+    }
+});
+
+// @desc    ABA PayWay Webhook callback
+// @route   POST /api/v1/orders/payway-webhook
+// @access  Public
+/**
+ * @swagger
+ * /api/v1/orders/payway-webhook:
+ *   post:
+ *     summary: ABA PayWay Webhook callback
+ *     tags: [Orders]
+ *     description: S2S callback from ABA PayWay to update order status
+ *     responses:
+ *       200:
+ *         description: Webhook processed
+ */
+appRouter.post('/api/v1/orders/payway-webhook', async (req: IncomingMessage, res: ServerResponse) => {
+    try {
+        // ABA usually sends data in form-data or JSON, depending on config.
+        // Assuming JSON body for the structure, or wait, ABA Payway sends form application/x-www-form-urlencoded
+        const bodyContent = await appRouter.parseJsonBody(req);
+        
+        let payload: any = {};
+        if (typeof bodyContent === 'string') {
+             // Parse url-encoded string
+             const parsed = new URLSearchParams(bodyContent);
+             parsed.forEach((value, key) => { payload[key] = value });
+        } else {
+             payload = bodyContent;
+        }
+
+        const tran_id = payload.tran_id;
+        const apv = payload.apv || ''; // approval code
+        const status = payload.status; // 0 for success
+        const hash = payload.hash;
+
+        console.log(`[ABA Webhook] Received status ${status} for tran_id ${tran_id}`);
+
+        if (tran_id) {
+            const isValid = verifyWebhookHash(tran_id, apv, status, hash);
+            if (!isValid) {
+                 return appRouter.sendResponse(res, 400, { message: 'Invalid hash signature' });
+            }
+
+            const order = await Order.findOne({ paywayTranId: tran_id });
+            if (order) {
+                 if (status === '0') {
+                      order.status = 'CONFIRMED';
+                      order.paywayStatus = 'APPROVED';
+                 } else {
+                      order.status = 'CANCELLED';
+                      order.paywayStatus = `DECLINED_${status}`;
+                      
+                      // Restock items
+                      for (const item of order.items) {
+                          const product = await Product.findById(item.product);
+                          if (product) {
+                              product.quantity += item.quantity;
+                              await product.save();
+                          }
+                      }
+                 }
+                 await order.save();
+            } else {
+                 console.error(`[ABA Webhook] Order with tran_id ${tran_id} not found`);
+            }
+        }
+
+        // Must respond HTTP 200 to acknowledge receipt to ABA
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'success' }));
+    } catch (e: any) {
+        console.error('[ABA Webhook] Error:', e);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'error', message: e.message || 'Server Error' }));
     }
 });
 
