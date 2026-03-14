@@ -23,7 +23,8 @@ export default function(appRouter: Router) {
                 startDate: { $lte: currentDate },
                 endDate: { $gte: currentDate }
             })
-            .populate('product', 'id name description sellingPrice costPrice variants imageUrl sku')
+            .populate('product', 'id name description sellingPrice costPrice variants imageUrl images sku category brand supplier')
+            .populate({ path: 'product', populate: [{ path: 'category', select: '_id name description' }, { path: 'brand', select: '_id name description logoUrl' }] })
             .sort({ endDate: 1 });
 
             const mappedPromotions = promotions.map((p: any) => {
