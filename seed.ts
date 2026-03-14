@@ -247,74 +247,62 @@ async function seedData() {
       {
         name: "Apple",
         description: "Think Different",
-        logoUrl:
-          "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?auto=format&fit=crop&q=80&w=100",
+        logoUrl: "https://logo.clearbit.com/apple.com",
       },
       {
         name: "Samsung",
         description: "Inspire the World",
-        logoUrl:
-          "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&q=80&w=100",
+        logoUrl: "https://logo.clearbit.com/samsung.com",
       },
       {
         name: "Sony",
         description: "Be Moved",
-        logoUrl:
-          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=100",
+        logoUrl: "https://logo.clearbit.com/sony.com",
       },
       {
         name: "Nike",
         description: "Just Do It",
-        logoUrl:
-          "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=100",
+        logoUrl: "https://logo.clearbit.com/nike.com",
       },
       {
         name: "Adidas",
         description: "Impossible is Nothing",
-        logoUrl:
-          "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&q=80&w=100",
+        logoUrl: "https://logo.clearbit.com/adidas.com",
       },
       {
         name: "IKEA",
         description: "The Wonderful Everyday",
-        logoUrl:
-          "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=100",
+        logoUrl: "https://logo.clearbit.com/ikea.com",
       },
       {
         name: "Dyson",
         description: "Solving Real Problems",
-        logoUrl:
-          "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&q=80&w=100",
+        logoUrl: "https://logo.clearbit.com/dyson.com",
       },
       {
         name: "L'Oréal",
         description: "Because You're Worth It",
-        logoUrl:
-          "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&q=80&w=100",
+        logoUrl: "https://logo.clearbit.com/loreal.com",
       },
       {
         name: "LEGO",
         description: "Play On",
-        logoUrl:
-          "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?auto=format&fit=crop&q=80&w=100",
+        logoUrl: "https://logo.clearbit.com/lego.com",
       },
       {
         name: "Nescafé",
         description: "It All Starts with a Cup",
-        logoUrl:
-          "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?auto=format&fit=crop&q=80&w=100",
+        logoUrl: "https://logo.clearbit.com/nescafe.com",
       },
       {
         name: "DJI",
         description: "The Future of Possible",
-        logoUrl:
-          "https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&q=80&w=100",
+        logoUrl: "https://logo.clearbit.com/dji.com",
       },
       {
         name: "Canon",
         description: "Delighting You Always",
-        logoUrl:
-          "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?auto=format&fit=crop&q=80&w=100",
+        logoUrl: "https://logo.clearbit.com/canon.com",
       },
     ];
     const brand: Record<string, any> = {};

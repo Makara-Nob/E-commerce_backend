@@ -34,10 +34,10 @@ appRouter.post('/api/v1/public/products/all', async (req: IncomingMessage, res: 
         if (body.brandId) filter.brand = body.brandId;
         
         // Price filtering
-        if (body.minPrice || body.maxPrice) {
+        if (body.minPrice != null || body.maxPrice != null) {
             filter.sellingPrice = {};
-            if (body.minPrice) filter.sellingPrice.$gte = body.minPrice;
-            if (body.maxPrice) filter.sellingPrice.$lte = body.maxPrice;
+            if (body.minPrice != null) filter.sellingPrice.$gte = body.minPrice;
+            if (body.maxPrice != null) filter.sellingPrice.$lte = body.maxPrice;
         }
 
         const totalElements = await Product.countDocuments(filter);
