@@ -110,7 +110,6 @@ export const getCheckoutPayload = (orderInfo: any) => {
  */
 export const generateCofHash = (payload: any): string => {
   const hashString =
-    (payload.req_time || "") +
     (payload.merchant_id || "") +
     (payload.ctid || "") +
     (payload.return_param || "");
@@ -137,7 +136,7 @@ export const getCofPayload = (info: any) => {
   const payload = {
     req_time: req_time.toString(),
     merchant_id: ABA_PAYWAY_MERCHANT_ID.toString(),
-    ctid: `user_${info.ctid}`, // Use more unique ctid format
+    ctid: (info.email || `customer_${info.ctid}`).toString(), // Use email for better validation
     return_param: (info.return_param || "").toString(),
     firstname: (info.firstname || "").toString(),
     lastname: (info.lastname || "").toString(),
