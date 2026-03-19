@@ -4,7 +4,7 @@ import axios from "axios";
 // ================= CONFIG =================
 export const ABA_PAYWAY_API_URL =
   process.env.ABA_PAYWAY_API_URL ||
-  "https://checkout-sandbox.payway.com.kh/api/payment-gateway/v1/payments/purchase";
+  "https://checkout-sandbox.payway.com.kh/api/v1/purchase";
 
 export const ABA_PAYWAY_COF_URL =
   "https://checkout-sandbox.payway.com.kh/api/payment-gateway/v1/cof/initial";
@@ -93,7 +93,9 @@ export const getCheckoutPayload = (orderInfo: any) => {
     return_url: process.env.ABA_RETURN_URL || "",
     continue_success_url: process.env.ABA_SUCCESS_URL || "",
     cancel_url: process.env.ABA_CANCEL_URL || "",
-    return_deeplink: orderInfo.return_deeplink || "",
+    return_deeplink: orderInfo.return_deeplink 
+      ? Buffer.from(orderInfo.return_deeplink).toString("base64") 
+      : "",
     custom_fields: orderInfo.custom_fields || "",
     return_params: orderInfo.return_params || "",
     payout: orderInfo.payout || "",

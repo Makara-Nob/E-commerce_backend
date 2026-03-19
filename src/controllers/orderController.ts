@@ -384,7 +384,7 @@ export default function (appRouter: Router) {
             phone: "",
             payment_option: paymentOption || "",
             return_deeplink: process.env.ABA_RETURN_DEEPLINK || "",
-            view_type: "hosted",
+            view_type: "checkout",
           });
           paywayApiUrl = ABA_PAYWAY_API_URL;
         }
