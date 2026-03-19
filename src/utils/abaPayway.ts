@@ -59,7 +59,7 @@ export const generatePwHash = (payload: any): string => {
 
   console.log(`[ABA] Final Hash String: "${hashString}"`);
   console.log(`[ABA] Generated Hash: ${result}`);
-  
+
   return result;
 };
 
@@ -103,7 +103,6 @@ export const getCheckoutPayload = (orderInfo: any) => {
     additional_params: (orderInfo.additional_params || "").toString(),
     google_pay_token: (orderInfo.google_pay_token || "").toString(),
     skip_success_page: (orderInfo.skip_success_page || "").toString(),
-    view_type: (orderInfo.view_type || "hosted").toString(),
     payment_gate: (orderInfo.payment_gate || "").toString(),
   };
 
