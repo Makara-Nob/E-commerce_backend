@@ -176,7 +176,6 @@ export const generateTokenHash = (p: any): string => {
     (p.email ?? "") +
     (p.phone ?? "") +
     (p.type ?? "") +
-    (p.payment_option ?? "") +
     (p.currency ?? "") +
     (p.return_url ?? "") +
     (p.custom_fields ?? "") +
@@ -211,7 +210,6 @@ export const purchaseByToken = async (params: any) => {
     email: params.email || "",
     phone: params.phone || "",
     type: params.type || "purchase",
-    payment_option: params.payment_option || "",
     currency: params.currency || "USD",
     return_url: params.return_url || "",
     custom_fields: params.custom_fields || "",
