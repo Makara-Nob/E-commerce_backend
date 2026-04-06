@@ -158,27 +158,28 @@ export const getCofPayload = (info: any, baseUrl?: string) => {
 
 // ================= TOKEN HASH =================
 export const generateTokenHash = (p: any): string => {
-  // Hash field order matches ABA PayWay v2 documentation sample exactly.
-  // NOTE: `shipping` is NOT part of the hash for this endpoint.
-  // NOTE: phone comes before email (matching doc JSON field order).
+  // EXACT order from ABA PayWay official PHP sample:
+  // $b4hash = $req_time . $merchant_id . $tran_id . $amount . $items . $shipping
+  //         . $ctid . $pwt . $firstname . $lastname . $email . $phone . $type
+  //         . $return_url . $currency . $custom_fields . $return_params . $payout;
   const hashString =
     (p.req_time ?? "") +
     (p.merchant_id ?? "") +
     (p.tran_id ?? "") +
     (p.amount ?? "") +
     (p.items ?? "") +
+    (p.shipping ?? "") +
     (p.ctid ?? "") +
     (p.pwt ?? "") +
     (p.firstname ?? "") +
     (p.lastname ?? "") +
-    (p.phone ?? "") +
     (p.email ?? "") +
+    (p.phone ?? "") +
     (p.type ?? "") +
-    (p.continue_success_url ?? "") +
     (p.return_url ?? "") +
-    (p.return_param ?? "") +
     (p.currency ?? "") +
     (p.custom_fields ?? "") +
+    (p.return_params ?? "") +
     (p.payout ?? "");
 
   console.log("[ABA Token] HASH STRING:", hashString);
@@ -207,18 +208,19 @@ export const purchaseByToken = async (params: any) => {
     req_time: getReqTime(),
     merchant_id: ABA_PAYWAY_MERCHANT_ID,
     tran_id: params.tran_id.toString(),
-    amount: parseFloat(params.amount).toFixed(2),
+    amount: parseFloat(params.amount).toFixed(2), // string for hash
     items: itemsBase64,
+    shipping: params.shipping || "0.00",
     ctid: params.ctid || "",
     pwt: params.pwt || "",
     firstname: params.firstname || "",
     lastname: params.lastname || "",
-    phone: params.phone || "",
     email: params.email || "",
+    phone: params.phone || "",
     type: params.type || "purchase",
     continue_success_url: params.continue_success_url || "",
     return_url: returnUrlBase64,
-    return_param: params.return_param || "",
+    return_params: params.return_params || "",
     currency: params.currency || "USD",
     custom_fields: params.custom_fields || "",
     payout: params.payout || "",
