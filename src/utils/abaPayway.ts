@@ -116,10 +116,9 @@ export const getCheckoutPayload = (orderInfo: any, baseUrl?: string) => {
 
 // ================= COF HASH =================
 export const generateCofHash = (p: any): string => {
-  // Try to use a more robust hash if we supply req_time and tran_id
-  const hashString = p.req_time && p.tran_id 
-    ? (p.req_time + p.merchant_id + p.tran_id + (p.return_url || ""))
-    : (p.merchant_id + (p.return_param || ""));
+  const hashString =
+    (p.merchant_id ?? "") +
+    (p.return_param ?? "");
 
   console.log("[ABA COF] HASH STRING:", hashString);
 
