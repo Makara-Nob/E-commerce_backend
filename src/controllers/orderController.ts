@@ -19,6 +19,12 @@ import User from "../models/User";
 import { getCurrentPrice } from "../utils/promotionUtils";
 import { sendPushNotification } from "../utils/fcmService";
 
+const getBaseUrl = (req: IncomingMessage) => {
+  const protocol = (req.headers["x-forwarded-proto"] as string) || "http";
+  const host = req.headers.host;
+  return `${protocol}://${host}`;
+};
+
 export default function (appRouter: Router) {
   // @desc    Create new order from cart
   // @route   POST /api/v1/orders
@@ -202,6 +208,7 @@ export default function (appRouter: Router) {
             price: parseFloat(i.unitPrice).toFixed(2),
           }));
 
+          const baseUrl = getBaseUrl(req);
           const paywayPayload = getCheckoutPayload({
             tran_id: paywayTranId,
             amount: netAmount,
@@ -209,13 +216,11 @@ export default function (appRouter: Router) {
             firstname,
             lastname,
             email,
-            phone: "",
-            return_deeplink: process.env.ABA_RETURN_DEEPLINK || "",
-            view_type: "hosted_view",
-          });
+            phone: user?.phone || "",
+          }, baseUrl);
 
           responseData = {
-            order: responseData,
+            ...responseData,
             paywayPayload,
             paywayApiUrl: ABA_PAYWAY_API_URL,
           };
@@ -540,13 +545,14 @@ export default function (appRouter: Router) {
         const firstname = fallbackNames[0];
         const lastname = fallbackNames.slice(1).join(" ") || "";
 
+        const baseUrl = getBaseUrl(req);
         const cofPayload = getCofPayload({
           return_param: `link_card_${userId}`,
           firstname,
           lastname,
           email: user.email,
           phone: user.phone || "",
-        });
+        }, baseUrl);
 
         // POST to ABA on the server side without following the redirect.
         // Capture the direct /add-card/... URL from Location header — Flutter loads it
@@ -840,62 +846,114 @@ export default function (appRouter: Router) {
     "/api/v1/orders/payway-webhook",
     async (req: IncomingMessage, res: ServerResponse) => {
       try {
+        console.log(`[ABA Webhook] Request received: ${req.method} ${req.url}`);
+
+        if (req.method === "GET") {
+          // Browser redirect (Return URL)
+          const successHtml = `
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>Payment Successful</title>
+                <style>
+                  body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f4f6f9; }
+                  .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
+                  .icon { font-size: 60px; color: #4CAF50; margin-bottom: 20px; }
+                  h1 { margin: 0 0 10px; color: #1a1f36; }
+                  p { color: #4e5d78; line-height: 1.5; margin-bottom: 30px; }
+                  .btn { background: #0052cc; color: white; padding: 12px 30px; border-radius: 10px; text-decoration: none; font-weight: bold; }
+                </style>
+              </head>
+              <body>
+                <div class="card">
+                  <div class="icon">✓</div>
+                  <h1>Payment Successful!</h1>
+                  <p>Your transaction has been processed successfully. You can now close this window or return to the app.</p>
+                  <a href="#" class="btn" onclick="window.close(); return false;">Return to App</a>
+                </div>
+                <script>
+                  // Auto-close if possible after a short delay
+                  setTimeout(() => {
+                    // Try to notify the parent or close
+                    if (window.opener) window.close();
+                  }, 3000);
+                </script>
+              </body>
+            </html>
+          `;
+          res.writeHead(200, { "Content-Type": "text/html" });
+          res.end(successHtml);
+          return;
+        }
+
         const payload = await appRouter.parseJsonBody(req);
         const signature = req.headers["x-payway-hmac-sha512"] as string;
 
+        console.log(`[ABA Webhook] Raw Payload:`, JSON.stringify(payload, null, 2));
+
         if (!signature || !verifyWebhookSignature(payload, signature)) {
-          console.error("[ABA Webhook] Invalid signature or missing header");
+          console.error("[ABA Webhook] Signature Verification: FAILED ❌");
           return appRouter.sendResponse(res, 401, {
             message: "Invalid signature",
           });
         }
+        console.log("[ABA Webhook] Signature Verification: SUCCESS ✅");
 
         const tran_id = payload.tran_id;
-        const status = payload.status; // 0 for success
-
-        console.log(
-          `[ABA Webhook] Received status ${status} for tran_id ${tran_id}`,
-        );
-        console.log(`[ABA Webhook] Raw Payload:`, JSON.stringify(payload, null, 2));
+        const status = payload.status;
 
         if (tran_id) {
-          // Check if this is a Link Card (COF) callback by looking for pwt
-          const returnParams = payload.return_params;
-          const pwt = returnParams?.card_status?.pwt;
+          // Check if this is a Link Card (COF) callback by looking for pwt in return_params
+          let returnParams = payload.return_params;
+          
+          // Robustly handle if ABA sends return_params as a stringified JSON
+          if (typeof returnParams === "string") {
+            try {
+              returnParams = JSON.parse(returnParams);
+            } catch (e) {
+              console.error("[ABA Webhook] Failed to parse return_params string:", e);
+            }
+          }
+
+          const cardStatus = returnParams?.card_status;
+          const pwt = cardStatus?.pwt;
+          const ctid = returnParams?.ctid;
 
           if (pwt) {
             // Option #1: Link Card (COF) Flow
-            const returnParamStr = String(returnParams.return_param || "");
+            const returnParamVal = String(returnParams.return_param || "");
             let orderUser: any = null;
             let order: any = null;
 
-            if (returnParamStr.startsWith("link_card_")) {
+            if (returnParamVal.startsWith("link_card_")) {
               // Standalone link card from Profile screen
-              const linkUserId = returnParamStr.replace("link_card_", "");
+              const linkUserId = returnParamVal.replace("link_card_", "");
               orderUser = await User.findById(linkUserId);
             } else {
               // Link card during checkout
-              order = await Order.findById(returnParamStr);
+              order = await Order.findById(returnParamVal);
               if (order && order.status === "PENDING") {
                 orderUser = await User.findById(order.userId);
               }
             }
 
             if (orderUser) {
-              console.log(`[ABA Webhook] Card linked for user ${orderUser._id}. Saving token...`);
-              const cardInfo = returnParams.card_status;
+              console.log(`[ABA Webhook] Card linked for user ${orderUser._id}. Saving ctid and pwt...`);
+              
               // Avoid duplicates by checking maskPan
-              const alreadySaved = orderUser.savedCards?.some((c: any) => c.maskPan === cardInfo.mask_pan);
+              const alreadySaved = orderUser.savedCards?.some((c: any) => c.maskPan === cardStatus.mask_pan);
               if (!alreadySaved) {
                 orderUser.savedCards = orderUser.savedCards || [];
                 orderUser.savedCards.push({
-                  pwt: cardInfo.pwt,
-                  maskPan: cardInfo.mask_pan,
-                  cardType: cardInfo.card_type,
-                  ctid: "",
+                  pwt: cardStatus.pwt,
+                  maskPan: cardStatus.mask_pan,
+                  cardType: cardStatus.card_type,
+                  ctid: ctid || "",
                 });
                 await orderUser.save();
-                console.log(`[ABA Webhook] Card saved for user ${orderUser._id}: ${cardInfo.mask_pan}`);
+                console.log(`[ABA Webhook] User found and card saved: TRUE ✅ for User ${orderUser._id}`);
+              } else {
+                console.log(`[ABA Webhook] Card already exists: SKIP ⚠️`);
               }
 
               // If this was linked during checkout, charge the order immediately
@@ -909,8 +967,8 @@ export default function (appRouter: Router) {
                       quantity: i.quantity,
                       price: parseFloat(i.unitPrice).toFixed(2),
                     })),
-                    pwt: cardInfo.pwt,
-                    ctid: "",
+                    pwt: cardStatus.pwt,
+                    ctid: ctid || "",
                     firstname: orderUser?.fullName || "Customer",
                     lastname: "",
                     email: orderUser?.email || "",
@@ -969,8 +1027,41 @@ export default function (appRouter: Router) {
         }
 
         // Must respond HTTP 200 to acknowledge receipt to ABA
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ status: "success" }));
+        // If this is a browser redirect (GET) from ABA, we return an HTML success page.
+        // Webhooks (POST) still get JSON.
+        if (req.method === "GET") {
+          res.writeHead(200, { "Content-Type": "text/html" });
+          res.end(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                  body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f9fafb; color: #111827; }
+                  .card { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); text-align: center; max-width: 90%; }
+                  .icon { color: #10b981; font-size: 3rem; margin-bottom: 1rem; }
+                  h1 { margin: 0 0 0.5rem; font-size: 1.25rem; }
+                  p { color: #6b7280; font-size: 0.875rem; margin-bottom: 1.5rem; }
+                </style>
+              </head>
+              <body>
+                <div class="card">
+                  <div class="icon">✓</div>
+                  <h1>Success!</h1>
+                  <p>Your card has been linked successfully.</p>
+                  <p>You can now close this window and return to the app.</p>
+                </div>
+                <script>
+                  // Try to close automatically after 2 seconds
+                  setTimeout(() => { window.close(); }, 2000);
+                </script>
+              </body>
+            </html>
+          `);
+        } else {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ status: "success" }));
+        }
       } catch (e: any) {
         console.error("[ABA Webhook] Error:", e);
         res.writeHead(500, { "Content-Type": "application/json" });

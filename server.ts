@@ -14,6 +14,12 @@ const app = express();
 // Standard express middleware for REST APIs
 app.use(cors());
 
+// Global request logger for debugging
+app.use((req, res, next) => {
+    console.log(`[REQUEST] ${req.method} ${req.url}`);
+    next();
+});
+
 // Parse JSON bodies (with a rawBody fallback for webhook verification just in case)
 app.use(express.json({
     verify: (req: any, res, buf) => {
