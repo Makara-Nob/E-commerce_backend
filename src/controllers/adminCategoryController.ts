@@ -89,7 +89,7 @@ export default function(appRouter: Router) {
             if (!await admin(req, res, appRouter)) return;
 
             const { name, description, code } = await appRouter.parseJsonBody(req);
-            const category = await Category.findOne({ id: req.params.id });
+            const category = await Category.findById(req.params.id);
 
             if (category) {
                 category.name = name || category.name;
@@ -128,7 +128,7 @@ export default function(appRouter: Router) {
         try {
             if (!await admin(req, res, appRouter)) return;
 
-            const category = await Category.findOne({ id: req.params.id });
+            const category = await Category.findById(req.params.id);
 
             if (category) {
                 await Category.deleteOne({ _id: category._id });

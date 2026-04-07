@@ -349,7 +349,7 @@ export default function(appRouter: Router) {
         return; // protect handles the 401 response here
       }
 
-      const user = await User.findOne({ id: userId });
+      const user = await User.findById(userId);
 
       if (user) {
         appRouter.sendResponse(res, 200, {
