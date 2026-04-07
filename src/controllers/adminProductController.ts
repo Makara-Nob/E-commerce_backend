@@ -16,14 +16,45 @@ export default function(appRouter: Router) {
      *       200:
      *         description: A list of all products including inactive ones
      */
-    appRouter.get('/api/v1/admin/products', async (req: IncomingMessage, res: ServerResponse) => {
+    appRouter.get('/api/v1/admin/products', async (req: any, res: ServerResponse) => {
         try {
             if (!await admin(req, res, appRouter)) return;
-            const products = await Product.find({})
+
+            const page = parseInt(req.query.pageNo as string) || 1;
+            const limit = parseInt(req.query.pageSize as string) || 10;
+            const skip = (page - 1) * limit;
+            const search = req.query.search as string || '';
+
+            const query: any = {};
+            if (search) {
+                query.$or = [
+                    { name: { $regex: search, $options: 'i' } },
+                    { sku: { $regex: search, $options: 'i' } }
+                ];
+            }
+
+            const total = await Product.countDocuments(query);
+            const products = await Product.find(query)
                 .populate('category', 'id name')
                 .populate('brand', 'id name')
-                .populate('supplier', 'id name');
-            appRouter.sendResponse(res, 200, products);
+                .populate('supplier', 'id name')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            const response = {
+                content: products,
+                pageNo: page,
+                pageSize: limit,
+                totalElements: total,
+                totalPages: Math.ceil(total / limit),
+                last: page * limit >= total,
+                first: page === 1,
+                hasNext: page * limit < total,
+                hasPrevious: page > 1
+            };
+
+            appRouter.sendResponse(res, 200, response);
         } catch (e) {
             appRouter.sendResponse(res, 500, { message: 'Server Error' });
         }
