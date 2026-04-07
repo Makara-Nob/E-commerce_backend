@@ -205,7 +205,9 @@ export default function(appRouter: Router) {
                 discountType: body.discountType || 'PERCENTAGE',
                 discountValue: body.discountValue || 0,
                 relatedProducts: body.relatedProducts || [],
-                status: body.status || 'ACTIVE'
+                status: body.status || 'ACTIVE',
+                options: Array.isArray(body.options) ? body.options : [],
+                variants: Array.isArray(body.variants) ? body.variants : [],
             });
 
             appRouter.sendResponse(res, 201, product);
