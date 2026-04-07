@@ -140,4 +140,68 @@ export default function(appRouter: Router) {
             appRouter.sendResponse(res, 500, { message: 'Server Error' });
         }
     });
+
+    /**
+     * @swagger
+     * /api/v1/admin/brands/fetch:
+     *   post:
+     *     summary: Fetch all brands with pagination (Admin view)
+     *     tags: [Admin - Brands]
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               pageNo:
+     *                 type: integer
+     *               pageSize:
+     *                 type: integer
+     *               search:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: A list of brands with pagination data
+     */
+    appRouter.post('/api/v1/admin/brands/fetch', async (req: any, res: ServerResponse) => {
+        try {
+            if (!await admin(req, res, appRouter)) return;
+
+            const body = await appRouter.parseJsonBody(req);
+            const page = parseInt(body.pageNo as string) || 1;
+            const limit = parseInt(body.pageSize as string) || 10;
+            const skip = (page - 1) * limit;
+            const search = body.search as string || '';
+
+            const query: any = {};
+            if (search) {
+                query.name = { $regex: search, $options: 'i' };
+            }
+
+            const total = await Brand.countDocuments(query);
+            const brands = await Brand.find(query)
+                .sort({ name: 1 })
+                .skip(skip)
+                .limit(limit);
+
+            const response = {
+                content: brands,
+                pageNo: page,
+                pageSize: limit,
+                totalElements: total,
+                totalPages: Math.ceil(total / limit),
+                last: page * limit >= total,
+                first: page === 1,
+                hasNext: page * limit < total,
+                hasPrevious: page > 1
+            };
+
+            appRouter.sendResponse(res, 200, response);
+        } catch (e) {
+            appRouter.sendResponse(res, 500, { message: 'Server Error' });
+        }
+    });
 }
