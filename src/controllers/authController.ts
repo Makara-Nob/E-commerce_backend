@@ -54,7 +54,7 @@ export default function(appRouter: Router) {
 
       if (user && (await user.matchPassword(password))) {
         appRouter.sendResponse(res, 200, {
-          token: generateToken(user._id),
+          token: generateToken(user._id, user.roles),
           user: {
             id: user._id,
             username: user.username,
@@ -235,7 +235,7 @@ export default function(appRouter: Router) {
       await user.save();
 
       appRouter.sendResponse(res, 200, {
-        token: generateToken(user._id),
+        token: generateToken(user._id, user.roles),
         user: {
           id: user._id,
           username: user.username,
