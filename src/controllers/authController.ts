@@ -5,7 +5,7 @@ import { IncomingMessage, ServerResponse } from "http";
 import { sendEmail } from "../utils/sendEmail";
 import { getOtpEmailTemplate } from "../utils/emailTemplates";
 
-export default function(appRouter: Router) {
+export default function (appRouter: Router) {
   /**
    * @swagger
    * /api/v1/auth/login:
@@ -71,7 +71,7 @@ export default function(appRouter: Router) {
       } else {
         appRouter.sendResponse(res, 401, { message: "Invalid credentials" });
       }
-  } catch (e) {
+    } catch (e) {
       appRouter.sendResponse(res, 500, { message: "Server Error" });
     }
   });
@@ -129,8 +129,8 @@ export default function(appRouter: Router) {
       // Check if user already exists
       const userExists = await User.findOne({ $or: [{ email }, { username }] });
       if (userExists) {
-        return appRouter.sendResponse(res, 400, { 
-          message: "User already exists with that email or username" 
+        return appRouter.sendResponse(res, 400, {
+          message: "User already exists with that email or username"
         });
       }
 
@@ -422,7 +422,7 @@ export default function(appRouter: Router) {
       }
 
       const body = await appRouter.parseJsonBody(req);
-      
+
       // Map frontend fields to backend fields
       if (body.firstName || body.lastName) {
         const currentFullName = user.fullName || "";
@@ -431,7 +431,7 @@ export default function(appRouter: Router) {
         const lastName = body.lastName !== undefined ? body.lastName : (nameParts.slice(1).join(" ") || "");
         user.fullName = `${firstName} ${lastName}`.trim();
       }
-      
+
       if (body.fullName) user.fullName = body.fullName;
       if (body.email) user.email = body.email;
       if (body.phone) user.phone = body.phone;
