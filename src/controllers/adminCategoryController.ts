@@ -108,6 +108,93 @@ export default function(appRouter: Router) {
 
     /**
      * @swagger
+     * /api/v1/admin/categories/fetch:
+     *   post:
+     *     summary: Fetch all categories with pagination (Admin view)
+     *     tags: [Admin - Categories]
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               pageNo:
+     *                 type: integer
+     *               pageSize:
+     *                 type: integer
+     *               search:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: A list of categories with pagination data
+     */
+    appRouter.post('/api/v1/admin/categories/fetch', async (req: any, res: ServerResponse) => {
+        try {
+            if (!await admin(req, res, appRouter)) return;
+
+            const body = await appRouter.parseJsonBody(req);
+            const page = parseInt(body.pageNo as string) || 1;
+            const limit = parseInt(body.pageSize as string) || 10;
+            const skip = (page - 1) * limit;
+            const search = body.search as string || '';
+
+            const query: any = {};
+            if (search) {
+                query.name = { $regex: search, $options: 'i' };
+            }
+
+            const total = await Category.countDocuments(query);
+            const categories = await Category.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            const response = {
+                content: categories,
+                pageNo: page,
+                pageSize: limit,
+                totalElements: total,
+                totalPages: Math.ceil(total / limit),
+                last: page * limit >= total,
+                first: page === 1,
+                hasNext: page * limit < total,
+                hasPrevious: page > 1
+            };
+
+            appRouter.sendResponse(res, 200, response);
+        } catch (e) {
+            appRouter.sendResponse(res, 500, { message: 'Server Error' });
+        }
+    });
+
+    /**
+     * @swagger
+     * /api/v1/admin/categories:
+     *   get:
+     *     summary: Fetch all categories (Admin view)
+     *     tags: [Admin - Categories]
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: A list of all categories
+     */
+    appRouter.get('/api/v1/admin/categories', async (req: any, res: ServerResponse) => {
+        try {
+            if (!await admin(req, res, appRouter)) return;
+
+            const categories = await Category.find({}).sort({ name: 1 });
+            appRouter.sendResponse(res, 200, categories);
+        } catch (e) {
+            appRouter.sendResponse(res, 500, { message: 'Server Error' });
+        }
+    });
+
+    /**
+     * @swagger
      * /api/v1/admin/categories/{id}:
      *   delete:
      *     summary: Delete a category
