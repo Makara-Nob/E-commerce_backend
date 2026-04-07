@@ -261,7 +261,7 @@ export default function(appRouter: Router) {
             if (!await admin(req, res, appRouter)) return;
 
             const body = await appRouter.parseJsonBody(req);
-            const product = await Product.findOne({ id: req.params.id });
+            const product = await Product.findById(req.params.id);
 
             if (product) {
                 Object.assign(product, body);
@@ -329,7 +329,7 @@ export default function(appRouter: Router) {
              if (!await admin(req, res, appRouter)) return;
              
              const body = await appRouter.parseJsonBody(req);
-             const product = await Product.findOne({ id: req.params.id });
+             const product = await Product.findById(req.params.id);
              
              if (!product) {
                  return appRouter.sendResponse(res, 404, { message: 'Product not found' });

@@ -88,7 +88,7 @@ export default function(appRouter: Router) {
             if (!await admin(req, res, appRouter)) return;
 
             const { name, description, logoUrl, status } = await appRouter.parseJsonBody(req);
-            const brand = await Brand.findOne({ id: req.params.id });
+            const brand = await Brand.findById(req.params.id);
 
             if (brand) {
                 brand.name = name || brand.name;
@@ -128,7 +128,7 @@ export default function(appRouter: Router) {
         try {
             if (!await admin(req, res, appRouter)) return;
 
-            const brand = await Brand.findOne({ id: req.params.id });
+            const brand = await Brand.findById(req.params.id);
 
             if (brand) {
                 await Brand.deleteOne({ _id: brand._id });

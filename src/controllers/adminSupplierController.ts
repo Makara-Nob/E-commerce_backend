@@ -118,7 +118,7 @@ export default function(appRouter: Router) {
             if (!await admin(req, res, appRouter)) return;
 
             const { name, contactPerson, phone, email, address, status } = await appRouter.parseJsonBody(req);
-            const supplier = await Supplier.findOne({ id: req.params.id });
+            const supplier = await Supplier.findById(req.params.id);
 
             if (supplier) {
                 supplier.name = name || supplier.name;
@@ -160,7 +160,7 @@ export default function(appRouter: Router) {
         try {
             if (!await admin(req, res, appRouter)) return;
 
-            const supplier = await Supplier.findOne({ id: req.params.id });
+            const supplier = await Supplier.findById(req.params.id);
 
             if (supplier) {
                 await Supplier.deleteOne({ _id: supplier._id });
