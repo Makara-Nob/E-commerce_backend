@@ -52,6 +52,7 @@ export default function(appRouter: Router) {
                 .populate('category', 'id name')
                 .populate('brand', 'id name')
                 .populate('supplier', 'id name')
+                .populate('relatedProducts', 'id name')
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
@@ -108,6 +109,7 @@ export default function(appRouter: Router) {
                 .populate('category', 'id name')
                 .populate('brand', 'id name')
                 .populate('supplier', 'id name')
+                .populate('relatedProducts', 'id name')
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
@@ -261,6 +263,46 @@ export default function(appRouter: Router) {
      *       200:
      *         description: Product updated
      */
+    /**
+     * @swagger
+     * /api/v1/admin/products/{id}:
+     *   get:
+     *     summary: Get single product by ID
+     *     tags: [Admin - Products]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Product details
+     *       404:
+     *         description: Product not found
+     */
+    appRouter.get('/api/v1/admin/products/:id', async (req: IncomingMessage & { params?: any }, res: ServerResponse) => {
+        try {
+            if (!await admin(req, res, appRouter)) return;
+
+            const product = await Product.findById(req.params.id)
+                .populate('category', 'id name')
+                .populate('brand', 'id name')
+                .populate('supplier', 'id name')
+                .populate('relatedProducts', 'id name');
+
+            if (product) {
+                appRouter.sendResponse(res, 200, product);
+            } else {
+                appRouter.sendResponse(res, 404, { message: 'Product not found' });
+            }
+        } catch (e) {
+            appRouter.sendResponse(res, 500, { message: 'Server Error' });
+        }
+    });
+
     appRouter.put('/api/v1/admin/products/:id', async (req: IncomingMessage & { params?: any }, res: ServerResponse) => {
         try {
             if (!await admin(req, res, appRouter)) return;
