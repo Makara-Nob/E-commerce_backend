@@ -107,6 +107,9 @@ export interface IProduct extends Document<number> {
     images: string[];
     options: IProductOption[];
     variants: IProductVariant[];
+    relatedProducts: number[];
+    discountType: 'PERCENTAGE' | 'FIXED';
+    discountValue: number;
 }
 
 const productSchema = new Schema<IProduct>({
@@ -126,7 +129,10 @@ const productSchema = new Schema<IProduct>({
     imageUrl: String,
     images: { type: [String], default: [] },
     options: [productOptionSchema],
-    variants: [productVariantSchema]
+    variants: [productVariantSchema],
+    relatedProducts: [{ type: Number, ref: 'Product' }],
+    discountType: { type: String, enum: ['PERCENTAGE', 'FIXED'], default: 'PERCENTAGE' },
+    discountValue: { type: Number, default: 0 }
 }, { timestamps: true });
 productSchema.plugin(autoIncrementPlugin, { modelName: 'Product', field: '_id' });
 

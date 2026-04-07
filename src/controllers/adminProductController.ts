@@ -202,6 +202,9 @@ export default function(appRouter: Router) {
                 minStock: body.minStock || 0,
                 costPrice: body.costPrice,
                 sellingPrice: body.sellingPrice,
+                discountType: body.discountType || 'PERCENTAGE',
+                discountValue: body.discountValue || 0,
+                relatedProducts: body.relatedProducts || [],
                 status: body.status || 'ACTIVE'
             });
 
@@ -272,6 +275,10 @@ export default function(appRouter: Router) {
                     if(skuExists) return appRouter.sendResponse(res, 400, { message: 'SKU already in use' });
                     product.sku = body.sku;
                 }
+                
+                if (body.discountType !== undefined) product.discountType = body.discountType;
+                if (body.discountValue !== undefined) product.discountValue = body.discountValue;
+                if (body.relatedProducts !== undefined) product.relatedProducts = body.relatedProducts;
 
                 const updatedProduct = await product.save();
                 appRouter.sendResponse(res, 200, updatedProduct);
@@ -344,4 +351,96 @@ export default function(appRouter: Router) {
              appRouter.sendResponse(res, 500, { message: 'Server Error' });
          }
     });
+
+    /**
+     * @swagger
+     * /api/v1/admin/products/{id}/variants/{variantId}:
+     *   put:
+     *     summary: Update product variant
+     *     tags: [Admin - Products]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *       - in: path
+     *         name: variantId
+     *         required: true
+     *         schema:
+     *           type: string
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *     responses:
+     *       200:
+     *         description: Variant updated
+     */
+    appRouter.put('/api/v1/admin/products/:id/variants/:variantId', async (req: IncomingMessage & { params?: any }, res: ServerResponse) => {
+        try {
+            if (!await admin(req, res, appRouter)) return;
+            
+            const body = await appRouter.parseJsonBody(req);
+            const product = await Product.findById(req.params.id);
+            
+            if (!product) {
+                return appRouter.sendResponse(res, 404, { message: 'Product not found' });
+            }
+            
+            const variant = (product.variants as any).id(req.params.variantId);
+            if (!variant) {
+                return appRouter.sendResponse(res, 404, { message: 'Variant not found' });
+            }
+
+            Object.assign(variant, body);
+            await product.save();
+            
+            appRouter.sendResponse(res, 200, variant);
+        } catch(e) {
+            appRouter.sendResponse(res, 500, { message: 'Server Error' });
+        }
+   });
+
+   /**
+     * @swagger
+     * /api/v1/admin/products/{id}/variants/{variantId}:
+     *   delete:
+     *     summary: Delete product variant
+     *     tags: [Admin - Products]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *       - in: path
+     *         name: variantId
+     *         required: true
+     *     responses:
+     *       200:
+     *         description: Variant deleted
+     */
+    appRouter.delete('/api/v1/admin/products/:id/variants/:variantId', async (req: IncomingMessage & { params?: any }, res: ServerResponse) => {
+        try {
+            if (!await admin(req, res, appRouter)) return;
+            
+            const product = await Product.findById(req.params.id);
+            
+            if (!product) {
+                return appRouter.sendResponse(res, 404, { message: 'Product not found' });
+            }
+            
+            (product.variants as any).pull({ _id: req.params.variantId });
+            await product.save();
+            
+            appRouter.sendResponse(res, 200, { message: 'Variant deleted successfully' });
+        } catch(e) {
+            appRouter.sendResponse(res, 500, { message: 'Server Error' });
+        }
+   });
 }
