@@ -18,6 +18,7 @@ import {
 import User from "../models/User";
 import { getCurrentPrice } from "../utils/promotionUtils";
 import { sendPushNotification } from "../utils/fcmService";
+import { sendTelegramMessage } from "../utils/telegramService";
 
 const getBaseUrl = (req: IncomingMessage) => {
   const protocol = (req.headers["x-forwarded-proto"] as string) || "http";
@@ -180,6 +181,24 @@ export default function (appRouter: Router) {
           "Order Placed!",
           `Your order #${order.id} has been placed successfully.`
         );
+        // ---------------------------------------
+
+        // --- TELEGRAM NOTIFICATION: NEW ORDER ---
+        try {
+          const user = await User.findById(userId);
+          const customerName = user?.fullName || "A Customer";
+          const telegramMsg = `🔔 *New Order Received!* \n\n` +
+            `🆔 *Order ID:* #${order.id}\n` +
+            `👤 *Customer:* ${customerName}\n` +
+            `💰 *Amount:* $${netAmount.toFixed(2)}\n` +
+            `💳 *Payment:* ${paymentMethod || "CASH"}\n` +
+            `📍 *Address:* ${shippingAddress}\n` +
+            `📝 *Note:* ${note || "None"}`;
+          
+          sendTelegramMessage(telegramMsg); // Fire and forget
+        } catch (tgErr) {
+          console.error("[Telegram] Alert failed during order creation:", tgErr);
+        }
         // ---------------------------------------
 
         // 4. Clear the cart if used
