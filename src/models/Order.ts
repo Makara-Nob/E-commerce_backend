@@ -7,6 +7,8 @@ export interface IOrderItem extends Document<string> {
     quantity: number;
     unitPrice: number;
     subTotal: number;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const orderItemSchema = new Schema<IOrderItem>({
@@ -33,6 +35,8 @@ export interface IOrder extends Document<string> {
     shippingAddress: string;
     note?: string;
     items: IOrderItem[];
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const orderSchema = new Schema<IOrder>({

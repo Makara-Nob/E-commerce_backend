@@ -7,6 +7,8 @@ export interface ICategory extends Document<number> {
     description?: string;
     code?: string;
     imageUrl?: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const categorySchema = new Schema<ICategory>({
@@ -26,6 +28,8 @@ export interface ISupplier extends Document<number> {
     email?: string;
     address?: string;
     status: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const supplierSchema = new Schema<ISupplier>({
@@ -46,6 +50,8 @@ export interface IBrand extends Document<number> {
     logoUrl?: string;
     imageUrl?: string;
     status: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const brandSchema = new Schema<IBrand>({
@@ -69,6 +75,8 @@ export interface IProductVariant extends Document<number> {
     discountType?: 'PERCENTAGE' | 'FIXED';
     discountValue?: number;
     status: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const productVariantSchema = new Schema<IProductVariant>({
@@ -116,6 +124,8 @@ export interface IProduct extends Document<number> {
     relatedProducts: number[];
     discountType: 'PERCENTAGE' | 'FIXED';
     discountValue: number;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const productSchema = new Schema<IProduct>({
