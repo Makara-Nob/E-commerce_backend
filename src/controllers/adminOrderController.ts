@@ -1,6 +1,5 @@
 import { Order } from '../models/Order';
 import User from '../models/User';
-import Notification from '../models/Notification';
 import { Router } from '../utils/Router';
 import { IncomingMessage, ServerResponse } from 'http';
 import { admin } from '../utils/authPlugin';
@@ -164,15 +163,7 @@ export default function (appRouter: Router) {
                 }
 
                 if (title && body) {
-                    // 1. Create database notification record
-                    await Notification.create({
-                        userId: order.userId,
-                        title,
-                        body,
-                        data: { orderId: order.id.toString(), type }
-                    });
-
-                    // 2. Send push notification
+                    // sendPushNotification already saves the Notification record internally
                     await sendPushNotification(
                         order.userId,
                         title,
