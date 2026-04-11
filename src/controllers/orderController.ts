@@ -648,7 +648,10 @@ export default function (appRouter: Router) {
         const card = user.savedCards[cardIndex];
         if (!card) return appRouter.sendResponse(res, 400, { message: "Card not found" });
 
-        if (!order.paywayTranId) {
+        // Always generate a fresh tran_id for token purchases.
+        // The original paywayTranId was already submitted to ABA during the standard
+        // checkout step, so reusing it causes ABA error code 8 (duplicate transaction).
+        {
           const dt = new Date();
           const randomStr = Math.floor(100000 + Math.random() * 900000).toString();
           order.paywayTranId =
@@ -1027,6 +1030,18 @@ export default function (appRouter: Router) {
               // If this was linked during checkout, charge the order immediately
               if (order) {
                 try {
+                  // Generate a fresh tran_id — the original was already sent to ABA
+                  // during checkout initiation, so reusing it causes error code 8 (duplicate).
+                  {
+                    const dt = new Date();
+                    const randomStr = Math.floor(100000 + Math.random() * 900000).toString();
+                    order.paywayTranId =
+                      dt.getFullYear().toString() +
+                      (dt.getMonth() + 1).toString().padStart(2, "0") +
+                      dt.getDate().toString().padStart(2, "0") +
+                      randomStr;
+                    await order.save();
+                  }
                   const nameparts = (orderUser?.fullName || "Customer").split(" ");
                   const purchaseResult = await purchaseByToken({
                     tran_id: order.paywayTranId,
@@ -1034,7 +1049,7 @@ export default function (appRouter: Router) {
                     items: order.items.map((i: any) => ({
                       name: `Product_${i.product}`,
                       quantity: i.quantity,
-                      price: parseFloat(i.unitPrice),
+                      price: parseFloat(i.unitPrice).toFixed(2),
                     })),
                     pwt: cardStatus.pwt,
                     ctid: ctid || "",

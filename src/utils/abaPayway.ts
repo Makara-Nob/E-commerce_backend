@@ -218,7 +218,7 @@ export const purchaseByToken = async (params: any) => {
     lastname: params.lastname || "",
     email: params.email || "",
     phone: params.phone || "",
-    type: "pre-auth",
+    type: "purchase",
     return_url: returnUrlBase64,  // MUST match payload — base64 encoded
     currency: params.currency || "USD",
     custom_fields: params.custom_fields || "",
