@@ -69,7 +69,7 @@ export default function (appRouter: Router) {
         const userId = await protect(req, res, appRouter);
         if (!userId) return;
 
-        const { shippingAddress, paymentMethod, note, items: directItems, isBuyNow } =
+        const { shippingAddress, paymentMethod, note, items: directItems, isBuyNow, paymentOption } =
           await appRouter.parseJsonBody(req);
 
         if (!shippingAddress) {
@@ -238,6 +238,7 @@ export default function (appRouter: Router) {
             lastname,
             email,
             phone: user?.phone || "",
+            payment_option: paymentOption || "cards",
           }, baseUrl);
 
           responseData = {
