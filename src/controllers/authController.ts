@@ -59,7 +59,8 @@ export default function (appRouter: Router) {
             id: user._id,
             username: user.username,
             email: user.email,
-            fullName: user.fullName,
+            firstName: user.firstName,
+            lastName: user.lastName,
             role: user.roles && user.roles.length > 0 ? user.roles[0] : 'CUSTOMER',
             active: user.status === 'ACTIVE',
             position: user.position,
@@ -93,7 +94,8 @@ export default function (appRouter: Router) {
    *               - username
    *               - email
    *               - password
-   *               - fullName
+   *               - firstName
+   *               - lastName
    *             properties:
    *               username:
    *                 type: string
@@ -103,7 +105,9 @@ export default function (appRouter: Router) {
    *               password:
    *                 type: string
    *                 format: password
-   *               fullName:
+   *               firstName:
+   *                 type: string
+   *               lastName:
    *                 type: string
    *     responses:
    *       201:
@@ -118,11 +122,11 @@ export default function (appRouter: Router) {
   // @access  Public
   appRouter.post("/api/v1/auth/register", async (req: IncomingMessage, res: ServerResponse) => {
     try {
-      const { username, email, password, fullName } = await appRouter.parseJsonBody(req);
+      const { username, email, password, firstName, lastName } = await appRouter.parseJsonBody(req);
 
-      if (!username || !email || !password || !fullName) {
+      if (!username || !email || !password || !firstName || !lastName) {
         return appRouter.sendResponse(res, 400, {
-          message: "Please provide username, email, password, and fullName",
+          message: "Please provide username, email, password, firstName, and lastName",
         });
       }
 
@@ -143,7 +147,8 @@ export default function (appRouter: Router) {
         username,
         email,
         password, // Password hashing is handled by the Mongoose pre-save hook
-        fullName,
+        firstName,
+        lastName,
         position: null,
         status: 'INACTIVE', // Important: keep inactive until OTP is verified
         userPermission: 'PENDING',
@@ -240,7 +245,8 @@ export default function (appRouter: Router) {
           id: user._id,
           username: user.username,
           email: user.email,
-          fullName: user.fullName,
+          firstName: user.firstName,
+          lastName: user.lastName,
           role: user.roles && user.roles.length > 0 ? user.roles[0] : 'CUSTOMER',
           active: user.status === 'ACTIVE',
           position: user.position,
@@ -351,19 +357,13 @@ export default function (appRouter: Router) {
 
       const user = await User.findById(userId);
       if (user) {
-        // Split fullName into firstName and lastName for the frontend
-        const nameParts = (user.fullName || "").split(" ");
-        const firstName = nameParts[0] || "";
-        const lastName = nameParts.slice(1).join(" ") || "";
-
         appRouter.sendResponse(res, 200, {
           id: user._id.toString(),
           userIdentifier: user.username,
           username: user.username,
           email: user.email,
-          firstName: firstName,
-          lastName: lastName,
-          fullName: user.fullName,
+          firstName: user.firstName,
+          lastName: user.lastName,
           role: user.roles && user.roles.length > 0 ? user.roles[0] : 'CUSTOMER',
           userType: user.roles && user.roles.length > 0 ? user.roles[0] : 'CUSTOMER',
           active: user.status === 'ACTIVE',
@@ -423,16 +423,8 @@ export default function (appRouter: Router) {
 
       const body = await appRouter.parseJsonBody(req);
 
-      // Map frontend fields to backend fields
-      if (body.firstName || body.lastName) {
-        const currentFullName = user.fullName || "";
-        const nameParts = currentFullName.split(" ");
-        const firstName = body.firstName !== undefined ? body.firstName : (nameParts[0] || "");
-        const lastName = body.lastName !== undefined ? body.lastName : (nameParts.slice(1).join(" ") || "");
-        user.fullName = `${firstName} ${lastName}`.trim();
-      }
-
-      if (body.fullName) user.fullName = body.fullName;
+      if (body.firstName !== undefined) user.firstName = body.firstName;
+      if (body.lastName !== undefined) user.lastName = body.lastName;
       if (body.email) user.email = body.email;
       if (body.phone) user.phone = body.phone;
       if (body.phoneNumber) user.phone = body.phoneNumber;
@@ -448,21 +440,15 @@ export default function (appRouter: Router) {
 
       await user.save();
 
-      // Split fullName into firstName and lastName for the frontend
-      const nameParts = (user.fullName || "").split(" ");
-      const firstName = nameParts[0] || "";
-      const lastName = nameParts.slice(1).join(" ") || "";
-
       appRouter.sendResponse(res, 200, {
         id: user._id.toString(),
         userIdentifier: user.username,
         username: user.username,
         email: user.email,
-        firstName: firstName,
-        lastName: lastName,
+        firstName: user.firstName,
+        lastName: user.lastName,
         phone: user.phone,
         phoneNumber: user.phone,
-        fullName: user.fullName,
         role: user.roles && user.roles.length > 0 ? user.roles[0] : 'CUSTOMER',
         userType: user.roles && user.roles.length > 0 ? user.roles[0] : 'CUSTOMER',
         active: user.status === 'ACTIVE',

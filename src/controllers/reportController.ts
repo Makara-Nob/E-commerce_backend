@@ -216,7 +216,7 @@ export default function (appRouter: Router) {
 
             // 4. Recent Orders (Last 5)
             const recentOrders = await Order.find()
-                .populate('userId', 'fullName profileUrl')
+                .populate('userId', 'firstName lastName profileUrl')
                 .sort({ createdAt: -1 })
                 .limit(5);
 
@@ -232,7 +232,7 @@ export default function (appRouter: Router) {
                 recentOrders: recentOrders.map(order => ({
                     id: order._id,
                     invoiceNumber: order.invoiceNumber,
-                    customerName: (order.userId as any)?.fullName || 'Guest',
+                    customerName: (order.userId as any) ? `${(order.userId as any).firstName || ''} ${(order.userId as any).lastName || ''}`.trim() || 'Guest' : 'Guest',
                     customerProfile: (order.userId as any)?.profileUrl,
                     amount: order.netAmount,
                     status: order.status,

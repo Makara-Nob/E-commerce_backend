@@ -138,7 +138,8 @@ async function seedData() {
         username: "admin@gmail.com",
         email: "admin@gmail.com",
         password: "88889999",
-        fullName: "Super Administrator",
+        firstName: "Super",
+        lastName: "Administrator",
         position: "Manager",
         status: "ACTIVE",
         userPermission: "APPROVED",
@@ -148,7 +149,8 @@ async function seedData() {
         username: "staff",
         email: "staff@gmail.com",
         password: "staff123",
-        fullName: "Staff Member",
+        firstName: "Staff",
+        lastName: "Member",
         position: "Sales",
         status: "ACTIVE",
         userPermission: "APPROVED",
@@ -158,7 +160,8 @@ async function seedData() {
         username: "manager",
         email: "manager@gmail.com",
         password: "manager123",
-        fullName: "Lisa Manager",
+        firstName: "Lisa",
+        lastName: "Manager",
         position: "Operations Manager",
         status: "ACTIVE",
         userPermission: "APPROVED",
@@ -168,7 +171,8 @@ async function seedData() {
         username: "customer",
         email: "customer@gmail.com",
         password: "customer123",
-        fullName: "John Doe",
+        firstName: "John",
+        lastName: "Doe",
         status: "ACTIVE",
         userPermission: "NORMAL",
         roles: ["CUSTOMER"],
@@ -177,7 +181,8 @@ async function seedData() {
         username: "jane",
         email: "jane@gmail.com",
         password: "jane123",
-        fullName: "Jane Smith",
+        firstName: "Jane",
+        lastName: "Smith",
         status: "ACTIVE",
         userPermission: "NORMAL",
         roles: ["CUSTOMER"],
@@ -186,7 +191,8 @@ async function seedData() {
         username: "david",
         email: "david@gmail.com",
         password: "david123",
-        fullName: "David Chen",
+        firstName: "David",
+        lastName: "Chen",
         status: "ACTIVE",
         userPermission: "NORMAL",
         roles: ["CUSTOMER"],
@@ -2025,7 +2031,7 @@ async function seedData() {
     // Helpers
     const findProd  = (sku: string)   => insertedProducts.find((p: any) => p.sku === sku)?._id;
     const findUser  = (email: string) => insertedUsers.find((u: any) => u.email === email)?._id;
-    const findName  = (email: string) => insertedUsers.find((u: any) => u.email === email)?.fullName ?? email;
+    const findName  = (email: string) => { const u = insertedUsers.find((u: any) => u.email === email); return u ? `${u.firstName} ${u.lastName}` : email; };
 
     const reviewsData = [
       // MacBook Pro M3

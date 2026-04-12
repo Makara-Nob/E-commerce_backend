@@ -186,7 +186,7 @@ export default function (appRouter: Router) {
         // --- TELEGRAM NOTIFICATION: NEW ORDER ---
         try {
           const user = await User.findById(userId);
-          const customerName = user?.fullName || "A Customer";
+          const customerName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || "A Customer" : "A Customer";
           const telegramMsg = `🔔 *New Order Received!* \n\n` +
             `🆔 *Order ID:* #${order.id}\n` +
             `👤 *Customer:* ${customerName}\n` +
@@ -214,10 +214,8 @@ export default function (appRouter: Router) {
 
         if (paymentMethod === "ABA_PAYWAY") {
           const user = await User.findById(userId);
-          const fallbackNames =
-            user && user.fullName ? user.fullName.split(" ") : ["Customer", ""];
-          const firstname = fallbackNames[0];
-          const lastname = fallbackNames.slice(1).join(" ") || "";
+          const firstname = user?.firstName || "Customer";
+          const lastname = user?.lastName || "";
           const email = user ? user.email : "";
 
           // In a real application we would populate the actual product names for the items
@@ -497,9 +495,8 @@ export default function (appRouter: Router) {
         }
 
         const user = await User.findById(userId);
-        const fallbackNames = user && user.fullName ? user.fullName.split(" ") : ["Customer", ""];
-        const firstname = fallbackNames[0];
-        const lastname = fallbackNames.slice(1).join(" ") || "";
+        const firstname = user?.firstName || "Customer";
+        const lastname = user?.lastName || "";
         const email = user && user.email ? user.email : "";
 
         const baseUrl = getBaseUrl(req);
@@ -579,9 +576,8 @@ export default function (appRouter: Router) {
         const user = await User.findById(userId);
         if (!user) return appRouter.sendResponse(res, 404, { message: "User not found" });
 
-        const fallbackNames = user.fullName ? user.fullName.split(" ") : ["Customer", ""];
-        const firstname = fallbackNames[0];
-        const lastname = fallbackNames.slice(1).join(" ") || "";
+        const firstname = user.firstName || "Customer";
+        const lastname = user.lastName || "";
 
         const baseUrl = getBaseUrl(req);
         const cofPayload = getCofPayload({
@@ -675,8 +671,8 @@ export default function (appRouter: Router) {
           items: paywayItems,
           ctid: card.ctid,
           pwt: card.pwt,
-          firstname: user.fullName?.split(' ')[0] || 'Customer',
-          lastname: user.fullName?.split(' ').slice(1).join(' ') || '',
+          firstname: user.firstName || 'Customer',
+          lastname: user.lastName || '',
           email: user.email,
           baseUrl,
         });
@@ -1069,7 +1065,6 @@ export default function (appRouter: Router) {
                       randomStr;
                     await order.save();
                   }
-                  const nameparts = (orderUser?.fullName || "Customer").split(" ");
                   const purchaseResult = await purchaseByToken({
                     tran_id: order.paywayTranId,
                     amount: order.netAmount,
@@ -1080,8 +1075,8 @@ export default function (appRouter: Router) {
                     })),
                     pwt: cardStatus.pwt,
                     ctid: ctid || "",
-                    firstname: nameparts[0] || "Customer",
-                    lastname: nameparts.slice(1).join(" ") || "",
+                    firstname: orderUser?.firstName || "Customer",
+                    lastname: orderUser?.lastName || "",
                     email: orderUser?.email || "",
                     baseUrl: getBaseUrl(req),
                   });

@@ -25,7 +25,8 @@ export default function (appRouter: Router) {
             if (search) {
                 query.$or = [
                     { username: { $regex: search, $options: 'i' } },
-                    { fullName: { $regex: search, $options: 'i' } },
+                    { firstName: { $regex: search, $options: 'i' } },
+                    { lastName: { $regex: search, $options: 'i' } },
                     { email: { $regex: search, $options: 'i' } }
                 ];
             }
@@ -47,7 +48,8 @@ export default function (appRouter: Router) {
                 id: user._id,
                 username: user.username,
                 email: user.email,
-                fullName: user.fullName,
+                firstName: user.firstName,
+                lastName: user.lastName,
                 position: user.position,
                 status: user.status,
                 userPermission: user.userPermission,
@@ -92,7 +94,8 @@ export default function (appRouter: Router) {
                 id: user._id,
                 username: user.username,
                 email: user.email,
-                fullName: user.fullName,
+                firstName: user.firstName,
+                lastName: user.lastName,
                 position: user.position,
                 status: user.status,
                 userPermission: user.userPermission,
@@ -118,7 +121,7 @@ export default function (appRouter: Router) {
             if (!await admin(req, res, appRouter)) return;
 
             const body = await appRouter.parseJsonBody(req);
-            const { username, email, password, fullName, position, status, userPermission, roles } = body;
+            const { username, email, password, firstName, lastName, position, status, userPermission, roles } = body;
 
             const userExists = await User.findOne({ $or: [{ email }, { username }] });
             if (userExists) {
@@ -129,7 +132,8 @@ export default function (appRouter: Router) {
                 username,
                 email,
                 password,
-                fullName,
+                firstName,
+                lastName,
                 position: position || null,
                 status: status || 'ACTIVE',
                 userPermission: userPermission || 'APPROVED',
@@ -143,7 +147,8 @@ export default function (appRouter: Router) {
                         id: user._id,
                         username: user.username,
                         email: user.email,
-                        fullName: user.fullName,
+                        firstName: user.firstName,
+                lastName: user.lastName,
                         position: user.position,
                         status: user.status,
                         userPermission: user.userPermission,
@@ -202,7 +207,8 @@ export default function (appRouter: Router) {
 
             const body = await appRouter.parseJsonBody(req);
 
-            user.fullName = body.fullName || user.fullName;
+            if (body.firstName !== undefined) user.firstName = body.firstName;
+            if (body.lastName !== undefined) user.lastName = body.lastName;
             user.email = body.email || user.email;
             user.position = body.position !== undefined ? body.position : user.position;
             user.status = body.status || user.status;
@@ -221,7 +227,8 @@ export default function (appRouter: Router) {
                     id: updatedUser._id,
                     username: updatedUser.username,
                     email: updatedUser.email,
-                    fullName: updatedUser.fullName,
+                    firstName: updatedUser.firstName,
+                    lastName: updatedUser.lastName,
                     position: updatedUser.position,
                     status: updatedUser.status,
                     userPermission: updatedUser.userPermission,

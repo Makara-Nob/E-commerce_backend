@@ -58,7 +58,7 @@ export default function (appRouter: Router) {
                 // Search by invoice number or user name (via populate but MongoDB needs a different strategy for nested search or separate lookup)
                 // For simplicity, we search by invoiceNumber first. 
                 // To search by user name, we'd normally use an aggregation or find user ids first.
-                const users = await User.find({ fullName: { $regex: search, $options: 'i' } }).select('_id');
+                const users = await User.find({ $or: [{ firstName: { $regex: search, $options: 'i' } }, { lastName: { $regex: search, $options: 'i' } }] }).select('_id');
                 const userIds = users.map(u => u._id);
 
                 query.$or = [
@@ -69,7 +69,7 @@ export default function (appRouter: Router) {
 
             const total = await Order.countDocuments(query);
             const orders = await Order.find(query)
-                .populate('userId', 'fullName email phone')
+                .populate('userId', 'firstName lastName email phone')
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
@@ -173,7 +173,7 @@ export default function (appRouter: Router) {
                 }
             }
 
-            const updatedOrder = await Order.findById(order._id).populate('userId', 'fullName email phone');
+            const updatedOrder = await Order.findById(order._id).populate('userId', 'firstName lastName email phone');
             if (!updatedOrder) return appRouter.sendResponse(res, 404, { message: 'Order update verification failed' });
 
             const obj = updatedOrder.toObject();

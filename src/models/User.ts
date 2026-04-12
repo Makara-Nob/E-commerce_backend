@@ -19,7 +19,8 @@ export interface IUser extends Document<string>, IUserMethods {
     email: string;
     phone?: string;
     password?: string;
-    fullName: string;
+    firstName: string;
+    lastName: string;
     profileUrl?: string;
     position?: string;
     status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
@@ -64,7 +65,11 @@ const userSchema = new Schema<IUser, IUserModel, IUserMethods>({
         type: String,
         required: true,
     },
-    fullName: {
+    firstName: {
+        type: String,
+        required: true,
+    },
+    lastName: {
         type: String,
         required: true,
     },

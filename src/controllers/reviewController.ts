@@ -124,7 +124,7 @@ export default function(appRouter: Router) {
             const review = await new Review({
                 product:  productId,
                 user:     userId,
-                userName: user.fullName || user.username,
+                userName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username,
                 rating,
                 title:    title?.trim() || undefined,
                 body:     reviewBody.trim(),
