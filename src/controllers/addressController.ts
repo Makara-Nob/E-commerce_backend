@@ -56,61 +56,48 @@ export default function(appRouter: Router) {
             const userId = await protect(req, res, appRouter);
             if (!userId) return;
 
-            let body = '';
-            
-            req.on('data', (chunk: Buffer) => {
-                body += chunk.toString();
+            const { title, recipientName, phoneNumber, streetAddress, city, state, zipCode, isDefault } = (req as any).body || {};
+
+            if (!title || !recipientName || !phoneNumber || !streetAddress || !city) {
+                return appRouter.sendResponse(res, 400, { message: 'Missing required address fields' });
+            }
+
+            // If this is the user's first address, naturally make it default
+            const existingCount = await Address.countDocuments({ user: userId });
+            let shouldBeDefault = existingCount === 0 ? true : (isDefault || false);
+
+            // If setting to default, unset others
+            if (shouldBeDefault && existingCount > 0) {
+                await Address.updateMany({ user: userId }, { isDefault: false });
+            }
+
+            const newAddress = new Address({
+                user: userId,
+                title,
+                recipientName,
+                phoneNumber,
+                streetAddress,
+                city,
+                state,
+                zipCode,
+                isDefault: shouldBeDefault
             });
 
-            req.on('end', async () => {
-                try {
-                    const data = JSON.parse(body);
-                    const { title, recipientName, phoneNumber, streetAddress, city, state, zipCode, isDefault } = data;
+            await newAddress.save();
 
-                    if (!title || !recipientName || !phoneNumber || !streetAddress || !city) {
-                        return appRouter.sendResponse(res, 400, { message: 'Missing required address fields' });
-                    }
+            const responseAddress = {
+                id: newAddress._id,
+                title: newAddress.title,
+                recipientName: newAddress.recipientName,
+                phoneNumber: newAddress.phoneNumber,
+                streetAddress: newAddress.streetAddress,
+                city: newAddress.city,
+                state: newAddress.state,
+                zipCode: newAddress.zipCode,
+                isDefault: newAddress.isDefault
+            };
 
-                    // If this is the user's first address, naturally make it default
-                    const existingCount = await Address.countDocuments({ user: userId });
-                    let shouldBeDefault = existingCount === 0 ? true : (isDefault || false);
-
-                    // If setting to default, unset others
-                    if (shouldBeDefault && existingCount > 0) {
-                        await Address.updateMany({ user: userId }, { isDefault: false });
-                    }
-
-                    const newAddress = new Address({
-                        user: userId,
-                        title,
-                        recipientName,
-                        phoneNumber,
-                        streetAddress,
-                        city,
-                        state,
-                        zipCode,
-                        isDefault: shouldBeDefault
-                    });
-
-                    await newAddress.save();
-
-                    const responseAddress = {
-                        id: newAddress._id,
-                        title: newAddress.title,
-                        recipientName: newAddress.recipientName,
-                        phoneNumber: newAddress.phoneNumber,
-                        streetAddress: newAddress.streetAddress,
-                        city: newAddress.city,
-                        state: newAddress.state,
-                        zipCode: newAddress.zipCode,
-                        isDefault: newAddress.isDefault
-                    };
-
-                    appRouter.sendResponse(res, 201, responseAddress);
-                } catch (parseError) {
-                    appRouter.sendResponse(res, 400, { message: 'Invalid JSON payload' });
-                }
-            });
+            appRouter.sendResponse(res, 201, responseAddress);
         } catch (error) {
             console.error('Create Address Error:', error);
             appRouter.sendResponse(res, 500, { message: 'Server error while creating address' });
@@ -133,56 +120,46 @@ export default function(appRouter: Router) {
 
             const addressId = req.params.id;
 
-            let body = '';
-            req.on('data', (chunk: Buffer) => {
-                body += chunk.toString();
-            });
+            const data = (req as any).body || {};
 
-            req.on('end', async () => {
-                try {
-                    const data = JSON.parse(body);
-                    const address = await Address.findOne({ _id: addressId, user: userId });
+            const address = await Address.findOne({ _id: addressId, user: userId });
 
-                    if (!address) {
-                        return appRouter.sendResponse(res, 404, { message: 'Address not found' });
-                    }
+            if (!address) {
+                return appRouter.sendResponse(res, 404, { message: 'Address not found' });
+            }
 
-                    // Update fields if provided
-                    if (data.title) address.title = data.title;
-                    if (data.recipientName) address.recipientName = data.recipientName;
-                    if (data.phoneNumber) address.phoneNumber = data.phoneNumber;
-                    if (data.streetAddress) address.streetAddress = data.streetAddress;
-                    if (data.city) address.city = data.city;
-                    if (data.state !== undefined) address.state = data.state;
-                    if (data.zipCode !== undefined) address.zipCode = data.zipCode;
+            // Update fields if provided
+            if (data.title) address.title = data.title;
+            if (data.recipientName) address.recipientName = data.recipientName;
+            if (data.phoneNumber) address.phoneNumber = data.phoneNumber;
+            if (data.streetAddress) address.streetAddress = data.streetAddress;
+            if (data.city) address.city = data.city;
+            if (data.state !== undefined) address.state = data.state;
+            if (data.zipCode !== undefined) address.zipCode = data.zipCode;
 
-                    // Handle default status update
-                    if (data.isDefault === true && !address.isDefault) {
-                        await Address.updateMany({ user: userId }, { isDefault: false });
-                        address.isDefault = true;
-                    } else if (data.isDefault === false && address.isDefault) {
-                        address.isDefault = false;
-                    }
+            // Handle default status update
+            if (data.isDefault === true && !address.isDefault) {
+                await Address.updateMany({ user: userId }, { isDefault: false });
+                address.isDefault = true;
+            } else if (data.isDefault === false && address.isDefault) {
+                address.isDefault = false;
+            }
 
-                    await address.save();
+            await address.save();
 
-                    const responseAddress = {
-                        id: address._id,
-                        title: address.title,
-                        recipientName: address.recipientName,
-                        phoneNumber: address.phoneNumber,
-                        streetAddress: address.streetAddress,
-                        city: address.city,
-                        state: address.state,
-                        zipCode: address.zipCode,
-                        isDefault: address.isDefault
-                    };
+            const responseAddress = {
+                id: address._id,
+                title: address.title,
+                recipientName: address.recipientName,
+                phoneNumber: address.phoneNumber,
+                streetAddress: address.streetAddress,
+                city: address.city,
+                state: address.state,
+                zipCode: address.zipCode,
+                isDefault: address.isDefault
+            };
 
-                    appRouter.sendResponse(res, 200, responseAddress);
-                } catch (err) {
-                    appRouter.sendResponse(res, 400, { message: 'Invalid payload' });
-                }
-            });
+            appRouter.sendResponse(res, 200, responseAddress);
         } catch (error) {
             console.error('Update Address Error:', error);
             appRouter.sendResponse(res, 500, { message: 'Server error' });
