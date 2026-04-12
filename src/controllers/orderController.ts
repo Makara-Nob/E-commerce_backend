@@ -26,6 +26,16 @@ const getBaseUrl = (req: IncomingMessage) => {
   return `${protocol}://${host}`;
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  PENDING:   'To Pay',
+  CONFIRMED: 'Preparing',
+  SHIPPED:   'On the Way',
+  DELIVERED: 'Completed',
+  CANCELLED: 'Cancelled',
+};
+
+const getStatusLabel = (status: string): string => STATUS_LABELS[status] ?? status;
+
 export default function (appRouter: Router) {
   // @desc    Create new order from cart
   // @route   POST /api/v1/orders
@@ -327,6 +337,7 @@ export default function (appRouter: Router) {
           return {
             ...oObj,
             id: oObj._id,
+            statusLabel: getStatusLabel(oObj.status),
             items: oObj.items.map((item: any) => ({
               ...item,
               id: item._id,
@@ -414,6 +425,7 @@ export default function (appRouter: Router) {
           const mappedOrder = {
             ...oObj,
             id: oObj._id,
+            statusLabel: getStatusLabel(oObj.status),
             items: oObj.items.map((item: any) => ({
               ...item,
               id: item._id,
