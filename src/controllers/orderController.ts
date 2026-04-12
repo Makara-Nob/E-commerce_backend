@@ -19,6 +19,8 @@ import User from "../models/User";
 import { getCurrentPrice } from "../utils/promotionUtils";
 import { sendPushNotification } from "../utils/fcmService";
 import { sendTelegramMessage } from "../utils/telegramService";
+import { getOrCreatePricingConfig } from "../models/PricingConfig";
+import { computePricing } from "../utils/pricingUtils";
 
 const getBaseUrl = (req: IncomingMessage) => {
   const protocol = (req.headers["x-forwarded-proto"] as string) || "http";
@@ -155,9 +157,11 @@ export default function (appRouter: Router) {
           totalAmount += quantity * unitPrice;
         }
 
-        // 3. Create the order
+        // 3. Apply pricing config (tax + delivery)
+        const pricingConfig = await getOrCreatePricingConfig();
         const discountAmount = 0; // Can implement coupons later
-        const netAmount = totalAmount - discountAmount;
+        const pricing = computePricing(totalAmount, pricingConfig, discountAmount);
+        const { taxRate, taxAmount, deliveryFee, total: netAmount } = pricing;
 
         let paywayTranId;
         if (paymentMethod === "ABA_PAYWAY") {
@@ -175,6 +179,9 @@ export default function (appRouter: Router) {
         const order = await Order.create({
           userId,
           totalAmount,
+          taxRate,
+          taxAmount,
+          deliveryFee,
           discountAmount,
           netAmount,
           status: "PENDING",

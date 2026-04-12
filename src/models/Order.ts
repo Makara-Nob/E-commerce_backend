@@ -26,6 +26,9 @@ export interface IOrder extends Document<string> {
     invoiceNumber: string;
     userId: number;
     totalAmount: number;
+    taxRate: number;
+    taxAmount: number;
+    deliveryFee: number;
     discountAmount: number;
     netAmount: number;
     status: 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
@@ -43,9 +46,12 @@ const orderSchema = new Schema<IOrder>({
     _id: Number,
     invoiceNumber: { type: String, required: true, unique: true },
     userId: { type: Number, ref: 'User', required: true },
-    totalAmount: { type: Number, required: true },
+    totalAmount:    { type: Number, required: true },
+    taxRate:        { type: Number, default: 0 },
+    taxAmount:      { type: Number, default: 0 },
+    deliveryFee:    { type: Number, default: 0 },
     discountAmount: { type: Number, default: 0 },
-    netAmount: { type: Number, required: true },
+    netAmount:      { type: Number, required: true },
     status: {
         type: String,
         enum: ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'],

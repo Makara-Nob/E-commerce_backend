@@ -26,6 +26,7 @@ import wishlistController from '../controllers/wishlistController';
 import tokenController from '../controllers/tokenController';
 import notificationController from '../controllers/notificationController';
 import reviewController from '../controllers/reviewController';
+import pricingController from '../controllers/pricingController';
 
 const appRouter = new Router();
 
@@ -34,6 +35,7 @@ authController(appRouter);
 productController(appRouter);
 cartController(appRouter);
 orderController(appRouter);
+pricingController(appRouter);
 addressController(appRouter);
 publicPromotionController(appRouter);
 publicBannerController(appRouter);
