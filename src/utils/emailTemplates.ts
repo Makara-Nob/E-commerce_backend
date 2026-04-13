@@ -1,127 +1,305 @@
-export const getOtpEmailTemplate = (otp: string): string => {
+export const getPasswordChangeOtpEmailTemplate = (otp: string): string => {
+  const year = new Date().getFullYear();
   return `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Password Change Request – Makara Shop</title>
   <style>
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-      background-color: #f9f9f9; 
-      margin: 0; 
-      padding: 0; 
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #F2F1EE;
+      margin: 0;
+      padding: 0;
       -webkit-font-smoothing: antialiased;
     }
-    .wrapper { 
-      width: 100%; 
-      table-layout: fixed; 
-      background-color: #f9f9f9; 
-      padding: 40px 0; 
+    .wrapper { width: 100%; background-color: #F2F1EE; padding: 48px 0 64px; }
+    .container { max-width: 580px; margin: 0 auto; background-color: #FFFFFF; border-radius: 4px; overflow: hidden; }
+    .header-band { background-color: #111111; padding: 36px 48px 30px; text-align: center; }
+    .brand-name { font-family: 'Georgia', 'Times New Roman', Times, serif; font-size: 30px; font-weight: normal; color: #FFFFFF; letter-spacing: 10px; margin: 0 0 6px; text-transform: uppercase; }
+    .brand-tagline { font-size: 10px; letter-spacing: 5px; color: #C6A664; text-transform: uppercase; margin: 0; }
+    .gold-line { width: 40px; height: 1px; background-color: #C6A664; margin: 16px auto 0; }
+    .content { padding: 48px 48px 40px; }
+    .email-label { font-size: 11px; letter-spacing: 3px; color: #C6A664; text-transform: uppercase; margin: 0 0 20px; }
+    .email-heading { font-size: 22px; font-weight: 700; color: #111111; margin: 0 0 16px; line-height: 1.3; }
+    .email-body { font-size: 15px; color: #555555; line-height: 1.7; margin: 0 0 36px; }
+    .otp-section { background-color: #FAFAF9; border: 1px solid #E8E5DF; border-radius: 4px; padding: 28px 24px; text-align: center; margin-bottom: 36px; }
+    .otp-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #999999; margin: 0 0 14px; }
+    .otp-code { font-size: 40px; font-weight: 800; letter-spacing: 14px; color: #111111; margin: 0 0 14px; padding-left: 14px; display: block; }
+    .otp-expiry { font-size: 12px; color: #999999; margin: 0; }
+    .otp-expiry strong { color: #555555; }
+    .divider { height: 1px; background-color: #EFEFEF; margin: 0 0 32px; }
+    .security-notice { border-left: 3px solid #F5C6C6; padding: 12px 16px; margin-bottom: 36px; background-color: #FFFAFA; }
+    .security-notice p { font-size: 13px; color: #888888; line-height: 1.6; margin: 0; }
+    .security-notice strong { color: #C0392B; }
+    .footer { background-color: #FAFAF9; border-top: 1px solid #EFEFEF; padding: 28px 48px; text-align: center; }
+    .footer-brand { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #BBBBBB; margin: 0 0 8px; }
+    .footer-copy { font-size: 11px; color: #CCCCCC; margin: 0; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header-band">
+        <p class="brand-name">Makara</p>
+        <p class="brand-tagline">Shop</p>
+        <div class="gold-line"></div>
+      </div>
+      <div class="content">
+        <p class="email-label">Security Alert</p>
+        <h1 class="email-heading">Password Change Request</h1>
+        <p class="email-body">
+          We received a request to change the password for your Makara Shop account. Use the verification code below to authorise this action. The code is valid for <strong>10 minutes</strong>.
+        </p>
+        <div class="otp-section">
+          <p class="otp-label">Your Verification Code</p>
+          <span class="otp-code">${otp}</span>
+          <p class="otp-expiry">Expires in <strong>10 minutes</strong></p>
+        </div>
+        <div class="divider"></div>
+        <div class="security-notice">
+          <p>
+            <strong>Did not request this?</strong> If you did not initiate a password change, your account may be at risk. We recommend securing your account immediately by contacting our support team.
+          </p>
+        </div>
+      </div>
+      <div class="footer">
+        <p class="footer-brand">Makara Shop</p>
+        <p class="footer-copy">
+          Premium E-Commerce Experience<br>
+          &copy; ${year} Makara Shop. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+};
+
+export const getOtpEmailTemplate = (otp: string): string => {
+  const year = new Date().getFullYear();
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Verify Your Identity – Makara Shop</title>
+  <style>
+    /* Base Reset */
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #F2F1EE;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
     }
-    .container { 
-      max-width: 600px; 
-      margin: 0 auto; 
-      background-color: #ffffff; 
-      border-radius: 8px; 
-      overflow: hidden; 
-      box-shadow: 0 4px 10px rgba(0,0,0,0.04); 
+
+    /* Wrapper */
+    .wrapper {
+      width: 100%;
+      background-color: #F2F1EE;
+      padding: 48px 0 64px;
     }
-    .header { 
-      padding: 40px 30px 20px 30px; 
-      text-align: center; 
+
+    /* Container */
+    .container {
+      max-width: 580px;
+      margin: 0 auto;
+      background-color: #FFFFFF;
+      border-radius: 4px;
+      overflow: hidden;
     }
-    .header-logo-text {
-      font-family: 'Times New Roman', Times, serif;
-      font-size: 34px;
+
+    /* Header Banner */
+    .header-band {
+      background-color: #111111;
+      padding: 36px 48px 30px;
+      text-align: center;
+    }
+    .brand-name {
+      font-family: 'Georgia', 'Times New Roman', Times, serif;
+      font-size: 30px;
       font-weight: normal;
-      color: #000000;
-      letter-spacing: 6px;
+      color: #FFFFFF;
+      letter-spacing: 10px;
+      margin: 0 0 6px;
+      text-transform: uppercase;
+    }
+    .brand-tagline {
+      font-size: 10px;
+      letter-spacing: 5px;
+      color: #C6A664;
+      text-transform: uppercase;
       margin: 0;
     }
-    .header-subtitle {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      font-size: 14px;
-      letter-spacing: 8px;
-      color: #C6A664; /* Elegant Gold accent from the logo */
+    .gold-line {
+      width: 40px;
+      height: 1px;
+      background-color: #C6A664;
+      margin: 16px auto 0;
+    }
+
+    /* Content */
+    .content {
+      padding: 48px 48px 40px;
+    }
+    .email-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #C6A664;
       text-transform: uppercase;
-      margin-top: 8px;
-      margin-bottom: 0;
+      margin: 0 0 20px;
     }
-    .content { 
-      padding: 20px 40px 40px 40px; 
-      color: #4a4a4a; 
-      line-height: 1.6; 
-      font-size: 16px;
-      text-align: center;
-    }
-    .content h2 {
+    .email-heading {
+      font-size: 22px;
+      font-weight: 700;
       color: #111111;
-      font-size: 20px;
-      font-weight: 600;
-      margin-top: 0;
-      margin-bottom: 24px;
+      margin: 0 0 16px;
+      line-height: 1.3;
     }
-    .content p {
-      margin-bottom: 24px;
+    .email-body {
+      font-size: 15px;
+      color: #555555;
+      line-height: 1.7;
+      margin: 0 0 36px;
+    }
+
+    /* OTP Box */
+    .otp-section {
+      background-color: #FAFAF9;
+      border: 1px solid #E8E5DF;
+      border-radius: 4px;
+      padding: 28px 24px;
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .otp-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #999999;
+      margin: 0 0 14px;
+    }
+    .otp-code {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: 14px;
+      color: #111111;
+      margin: 0 0 14px;
+      /* Offset right padding to compensate for letter-spacing on last char */
+      padding-left: 14px;
+      display: block;
+    }
+    .otp-expiry {
+      font-size: 12px;
+      color: #999999;
+      margin: 0;
+    }
+    .otp-expiry strong {
       color: #555555;
     }
-    .otp-wrapper {
-      margin: 36px 0;
-      text-align: center;
+
+    /* Security Notice */
+    .security-notice {
+      border-left: 3px solid #E8E5DF;
+      padding: 12px 16px;
+      margin-bottom: 36px;
     }
-    .otp-code { 
-      display: inline-block;
-      font-size: 38px; 
-      font-weight: 700; 
-      letter-spacing: 12px; 
-      color: #000000; 
-      background-color: #fdfdfd;
-      border: 1px solid #eaeaea;
-      border-radius: 8px;
-      padding: 16px 24px 16px 36px; /* Offset for letter spacing */
+    .security-notice p {
+      font-size: 13px;
+      color: #888888;
+      line-height: 1.6;
+      margin: 0;
     }
+    .security-notice strong {
+      color: #555555;
+    }
+
+    /* Divider */
     .divider {
       height: 1px;
-      background-color: #eeeeee;
-      width: 60px;
-      margin: 0 auto 30px auto;
+      background-color: #EFEFEF;
+      margin: 0 0 32px;
     }
-    .footer { 
-      background-color: #fafafa; 
-      padding: 30px 40px; 
-      text-align: center; 
-      font-size: 12px; 
-      color: #888888; 
-      border-top: 1px solid #f0f0f0; 
+
+    /* Footer */
+    .footer {
+      background-color: #FAFAF9;
+      border-top: 1px solid #EFEFEF;
+      padding: 28px 48px;
+      text-align: center;
     }
-    .footer p {
-      margin: 4px 0;
+    .footer-brand {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #BBBBBB;
+      margin: 0 0 8px;
+    }
+    .footer-copy {
+      font-size: 11px;
+      color: #CCCCCC;
+      margin: 0;
+      line-height: 1.6;
     }
   </style>
 </head>
 <body>
   <div class="wrapper">
     <div class="container">
-      <div class="header">
-        <h1 class="header-logo-text">MAKARA</h1>
-        <p class="header-subtitle">SHOP</p>
+
+      <!-- Header -->
+      <div class="header-band">
+        <p class="brand-name">Makara</p>
+        <p class="brand-tagline">Shop</p>
+        <div class="gold-line"></div>
       </div>
+
+      <!-- Body -->
       <div class="content">
-        <h2>Verify Your Email Identity</h2>
-        <div class="divider"></div>
-        <p>You have initiated a registration request with Makara Shop. To securely complete your sign-up process, please use the following one-time verification code.</p>
-        
-        <div class="otp-wrapper">
-          <div class="otp-code">${otp}</div>
+        <p class="email-label">Account Verification</p>
+        <h1 class="email-heading">Confirm Your Identity</h1>
+        <p class="email-body">
+          You recently requested to create an account with Makara Shop. To complete your registration and secure your account, please use the one-time verification code below.
+        </p>
+
+        <!-- OTP Box -->
+        <div class="otp-section">
+          <p class="otp-label">Your Verification Code</p>
+          <span class="otp-code">${otp}</span>
+          <p class="otp-expiry">This code expires in <strong>10 minutes</strong></p>
         </div>
-        
-        <p style="font-size: 14px; color: #888888;">This code will expire in <strong>10 minutes</strong>. If you did not request this verification, please disregard this email.</p>
+
+        <div class="divider"></div>
+
+        <!-- Security Notice -->
+        <div class="security-notice">
+          <p>
+            <strong>Did not request this?</strong> If you did not initiate this registration, please disregard this email. Your account will not be activated without completing verification. For any concerns, contact our support team.
+          </p>
+        </div>
       </div>
+
+      <!-- Footer -->
       <div class="footer">
-        <p><strong>Makara Shop</strong></p>
-        <p>Premium E-Commerce Experience</p>
-        <p style="margin-top: 16px;">&copy; ${new Date().getFullYear()} Makara Shop. All rights reserved.</p>
+        <p class="footer-brand">Makara Shop</p>
+        <p class="footer-copy">
+          Premium E-Commerce Experience<br>
+          &copy; ${year} Makara Shop. All rights reserved.
+        </p>
       </div>
+
     </div>
   </div>
 </body>

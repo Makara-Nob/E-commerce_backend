@@ -3,6 +3,8 @@ import { protect, admin } from "../utils/authPlugin";
 import { Router } from "../utils/Router";
 import { IncomingMessage, ServerResponse } from "http";
 import bcrypt from 'bcryptjs';
+import { sendEmail } from "../utils/sendEmail";
+import { getPasswordChangeOtpEmailTemplate } from "../utils/emailTemplates";
 
 export default function (appRouter: Router) {
     // @desc    Get all users (with pagination and search)
@@ -243,7 +245,54 @@ export default function (appRouter: Router) {
         }
     });
 
-    // @desc    Change password
+    // @desc    Send OTP to verify password change
+    // @route   POST /api/v1/user/send-change-password-otp
+    // @access  Private
+    appRouter.post("/api/v1/user/send-change-password-otp", async (req: IncomingMessage, res: ServerResponse) => {
+        try {
+            const userId = await protect(req, res, appRouter);
+            if (!userId) return;
+
+            const user = await User.findById(userId);
+            if (!user) {
+                return appRouter.sendResponse(res, 404, { message: "User not found" });
+            }
+
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+            user.otp = otp;
+            user.otpExpiresAt = otpExpiresAt;
+            await user.save();
+
+            try {
+                await sendEmail({
+                    email: user.email,
+                    subject: 'Your Password Change Verification Code – Makara Shop',
+                    message: `Your password change verification code is: ${otp}. It will expire in 10 minutes.`,
+                    html: getPasswordChangeOtpEmailTemplate(otp)
+                });
+            } catch (emailErr) {
+                console.error('Failed to send password change OTP email', emailErr);
+                return appRouter.sendResponse(res, 500, { message: "Could not send verification email. Please try again." });
+            }
+
+            // Return masked email so the client can display it
+            const maskedEmail = user.email.replace(/^(.)(.*)(@.*)$/, (_, first, middle, domain) =>
+                first + '*'.repeat(Math.min(middle.length, 6)) + domain
+            );
+
+            appRouter.sendResponse(res, 200, {
+                message: "Verification code sent to your email",
+                data: { maskedEmail }
+            });
+        } catch (e: any) {
+            console.error(e);
+            appRouter.sendResponse(res, 500, { message: e.message || "Server Error" });
+        }
+    });
+
+    // @desc    Change password (requires OTP verification)
     // @route   POST /api/v1/user/change-password
     // @access  Private
     appRouter.post("/api/v1/user/change-password", async (req: IncomingMessage, res: ServerResponse) => {
@@ -252,19 +301,24 @@ export default function (appRouter: Router) {
             if (!userId) return;
 
             const body = await appRouter.parseJsonBody(req);
-            const { oldPassword, newPassword } = body;
+            const { otp, newPassword } = body;
+
+            if (!otp || !newPassword) {
+                return appRouter.sendResponse(res, 400, { message: "OTP and new password are required" });
+            }
 
             const user = await User.findById(userId);
             if (!user) {
                 return appRouter.sendResponse(res, 404, { message: "User not found" });
             }
 
-            const isMatch = await user.matchPassword(oldPassword);
-            if (!isMatch) {
-                return appRouter.sendResponse(res, 400, { message: "Old password does not match" });
+            if (!user.otp || !user.otpExpiresAt || user.otp !== otp || user.otpExpiresAt < new Date()) {
+                return appRouter.sendResponse(res, 400, { message: "Invalid or expired verification code" });
             }
 
             user.password = newPassword;
+            user.otp = undefined;
+            user.otpExpiresAt = undefined;
             await user.save();
 
             appRouter.sendResponse(res, 200, { message: "Password changed successfully", data: { id: user._id } });
