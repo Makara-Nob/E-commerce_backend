@@ -2,7 +2,10 @@ import nodemailer from 'nodemailer';
 
 export const sendEmail = async (options: { email: string, subject: string, message: string, html?: string }) => {
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        family: 4, // force IPv4 — Render does not support IPv6 outbound
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS

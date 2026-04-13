@@ -135,9 +135,9 @@ async function seedData() {
     console.log("👤 Seeding Users...");
     const users = [
       {
-        username: "admin@gmail.com",
-        email: "admin@gmail.com",
-        password: "88889999",
+        username: "admin",
+        email: "admin@naga.com",
+        password: "Naga@Admin2025!",
         firstName: "Super",
         lastName: "Administrator",
         position: "Manager",
@@ -147,8 +147,8 @@ async function seedData() {
       },
       {
         username: "staff",
-        email: "staff@gmail.com",
-        password: "staff123",
+        email: "staff@naga.com",
+        password: "Naga@Staff2025!",
         firstName: "Staff",
         lastName: "Member",
         position: "Sales",
@@ -158,8 +158,8 @@ async function seedData() {
       },
       {
         username: "manager",
-        email: "manager@gmail.com",
-        password: "manager123",
+        email: "manager@naga.com",
+        password: "Naga@Manager2025!",
         firstName: "Lisa",
         lastName: "Manager",
         position: "Operations Manager",
@@ -169,8 +169,8 @@ async function seedData() {
       },
       {
         username: "customer",
-        email: "customer@gmail.com",
-        password: "customer123",
+        email: "customer@naga.com",
+        password: "Naga@Customer2025!",
         firstName: "John",
         lastName: "Doe",
         status: "ACTIVE",
@@ -179,8 +179,8 @@ async function seedData() {
       },
       {
         username: "jane",
-        email: "jane@gmail.com",
-        password: "jane123",
+        email: "jane@naga.com",
+        password: "Naga@Jane2025!",
         firstName: "Jane",
         lastName: "Smith",
         status: "ACTIVE",
@@ -189,8 +189,8 @@ async function seedData() {
       },
       {
         username: "david",
-        email: "david@gmail.com",
-        password: "david123",
+        email: "david@naga.com",
+        password: "Naga@David2025!",
         firstName: "David",
         lastName: "Chen",
         status: "ACTIVE",
@@ -2029,49 +2029,49 @@ async function seedData() {
     console.log("⭐ Seeding Reviews...");
 
     // Helpers
-    const findProd  = (sku: string)   => insertedProducts.find((p: any) => p.sku === sku)?._id;
-    const findUser  = (email: string) => insertedUsers.find((u: any) => u.email === email)?._id;
-    const findName  = (email: string) => { const u = insertedUsers.find((u: any) => u.email === email); return u ? `${u.firstName} ${u.lastName}` : email; };
+    const findProd = (sku: string) => insertedProducts.find((p: any) => p.sku === sku)?._id;
+    const findUser = (email: string) => insertedUsers.find((u: any) => u.email === email)?._id;
+    const findName = (email: string) => { const u = insertedUsers.find((u: any) => u.email === email); return u ? `${u.firstName} ${u.lastName}` : email; };
 
     const reviewsData = [
       // MacBook Pro M3
-      { product: findProd('SKU-ELEC-001'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 5, title: 'Absolute beast of a laptop',       body: 'I moved from an Intel MacBook Pro and the M3 difference is night and day. Compiles my entire project in under 20 seconds. Battery easily lasts a full work day. Space Black looks stunning.', helpful: 24 },
-      { product: findProd('SKU-ELEC-001'), user: findUser('jane@gmail.com'),     userName: findName('jane@gmail.com'),     rating: 4, title: 'Great laptop, minor quirks',        body: 'Performance is incredible and the display is gorgeous. Only giving 4 stars because the notch still feels dated and base config needs more RAM for heavy Xcode projects.', helpful: 11 },
-      { product: findProd('SKU-ELEC-001'), user: findUser('david@gmail.com'),    userName: findName('david@gmail.com'),    rating: 5, title: 'Best purchase of the year',        body: 'As a video editor, the ProRes acceleration alone justifies the price. Export times dropped by 60%. MagSafe is so convenient.', helpful: 17 },
+      { product: findProd('SKU-ELEC-001'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 5, title: 'Absolute beast of a laptop', body: 'I moved from an Intel MacBook Pro and the M3 difference is night and day. Compiles my entire project in under 20 seconds. Battery easily lasts a full work day. Space Black looks stunning.', helpful: 24 },
+      { product: findProd('SKU-ELEC-001'), user: findUser('jane@gmail.com'), userName: findName('jane@gmail.com'), rating: 4, title: 'Great laptop, minor quirks', body: 'Performance is incredible and the display is gorgeous. Only giving 4 stars because the notch still feels dated and base config needs more RAM for heavy Xcode projects.', helpful: 11 },
+      { product: findProd('SKU-ELEC-001'), user: findUser('david@gmail.com'), userName: findName('david@gmail.com'), rating: 5, title: 'Best purchase of the year', body: 'As a video editor, the ProRes acceleration alone justifies the price. Export times dropped by 60%. MagSafe is so convenient.', helpful: 17 },
       // iPhone 15 Pro Max
-      { product: findProd('SKU-ELEC-002'), user: findUser('jane@gmail.com'),     userName: findName('jane@gmail.com'),     rating: 5, title: 'Best iPhone ever made',            body: 'The titanium frame feels premium without being heavy. Camera quality is unreal — 5x telephoto is a game changer for travel photography. USB-C is finally here!', helpful: 32 },
-      { product: findProd('SKU-ELEC-002'), user: findUser('david@gmail.com'),    userName: findName('david@gmail.com'),    rating: 4, title: 'Incredible camera, battery ok',   body: 'A17 Pro flies through everything. The camera system is the best on any phone. Battery drains faster when using ProRes video though.', helpful: 8 },
-      { product: findProd('SKU-ELEC-002'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 5, title: 'Worth every penny',               body: 'Coming from Samsung, the ecosystem integration is incredible. Action button is super useful. Natural Titanium does not show fingerprints.', helpful: 14 },
+      { product: findProd('SKU-ELEC-002'), user: findUser('jane@gmail.com'), userName: findName('jane@gmail.com'), rating: 5, title: 'Best iPhone ever made', body: 'The titanium frame feels premium without being heavy. Camera quality is unreal — 5x telephoto is a game changer for travel photography. USB-C is finally here!', helpful: 32 },
+      { product: findProd('SKU-ELEC-002'), user: findUser('david@gmail.com'), userName: findName('david@gmail.com'), rating: 4, title: 'Incredible camera, battery ok', body: 'A17 Pro flies through everything. The camera system is the best on any phone. Battery drains faster when using ProRes video though.', helpful: 8 },
+      { product: findProd('SKU-ELEC-002'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 5, title: 'Worth every penny', body: 'Coming from Samsung, the ecosystem integration is incredible. Action button is super useful. Natural Titanium does not show fingerprints.', helpful: 14 },
       // AirPods Pro 2nd Gen
-      { product: findProd('SKU-ELEC-003'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 5, title: 'ANC is absolutely incredible',     body: 'Wore these on a 14-hour flight and barely heard the engine. Adaptive Audio is the killer feature. Battery life is honest too.', helpful: 29 },
-      { product: findProd('SKU-ELEC-003'), user: findUser('jane@gmail.com'),     userName: findName('jane@gmail.com'),     rating: 4, title: 'Great but pricey',                body: 'Sound quality and ANC are top tier. Personalized Spatial Audio works well. Still the best wireless earbuds on the market.', helpful: 6 },
+      { product: findProd('SKU-ELEC-003'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 5, title: 'ANC is absolutely incredible', body: 'Wore these on a 14-hour flight and barely heard the engine. Adaptive Audio is the killer feature. Battery life is honest too.', helpful: 29 },
+      { product: findProd('SKU-ELEC-003'), user: findUser('jane@gmail.com'), userName: findName('jane@gmail.com'), rating: 4, title: 'Great but pricey', body: 'Sound quality and ANC are top tier. Personalized Spatial Audio works well. Still the best wireless earbuds on the market.', helpful: 6 },
       // Samsung Galaxy S24 Ultra
-      { product: findProd('SKU-ELEC-004'), user: findUser('david@gmail.com'),    userName: findName('david@gmail.com'),    rating: 5, title: 'Galaxy AI is actually useful',   body: 'Live translation and note-taking features are impressive. S Pen feels refined. 100x zoom is a party trick but useful in the right situations.', helpful: 19 },
-      { product: findProd('SKU-ELEC-004'), user: findUser('jane@gmail.com'),     userName: findName('jane@gmail.com'),     rating: 3, title: 'Too big for daily use',          body: 'Brilliant hardware but it is a brick. The AI features feel gimmicky after the first week. Great for productivity, bad as a phone.', helpful: 7 },
+      { product: findProd('SKU-ELEC-004'), user: findUser('david@gmail.com'), userName: findName('david@gmail.com'), rating: 5, title: 'Galaxy AI is actually useful', body: 'Live translation and note-taking features are impressive. S Pen feels refined. 100x zoom is a party trick but useful in the right situations.', helpful: 19 },
+      { product: findProd('SKU-ELEC-004'), user: findUser('jane@gmail.com'), userName: findName('jane@gmail.com'), rating: 3, title: 'Too big for daily use', body: 'Brilliant hardware but it is a brick. The AI features feel gimmicky after the first week. Great for productivity, bad as a phone.', helpful: 7 },
       // Sony WH-1000XM5
       { product: findProd('SKU-ELEC-005'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 5, title: 'Silence has never sounded so good', body: 'Work from a co-working space — these are a must. XM5 is lighter, better call quality, and even better ANC than the XM4.', helpful: 21 },
-      { product: findProd('SKU-ELEC-005'), user: findUser('david@gmail.com'),    userName: findName('david@gmail.com'),    rating: 4, title: 'Fantastic daily driver',          body: 'Comfortable for 4+ hour sessions. Multipoint pairing between laptop and phone works flawlessly.', helpful: 13 },
+      { product: findProd('SKU-ELEC-005'), user: findUser('david@gmail.com'), userName: findName('david@gmail.com'), rating: 4, title: 'Fantastic daily driver', body: 'Comfortable for 4+ hour sessions. Multipoint pairing between laptop and phone works flawlessly.', helpful: 13 },
       // LG OLED C3
-      { product: findProd('SKU-ELEC-010'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 5, title: 'OLED changed how I watch TV',     body: 'Came from a QLED and the contrast difference is shocking. Perfect blacks make HDR content look insane. Gaming at 4K 120fps on PS5 is butter smooth.', helpful: 41 },
-      { product: findProd('SKU-ELEC-010'), user: findUser('david@gmail.com'),    userName: findName('david@gmail.com'),    rating: 4, title: 'Stunning picture, so-so sound',  body: 'Picture quality is beyond compare but built-in speakers sound thin. Recommend pairing with a soundbar. Otherwise 5 stars.', helpful: 16 },
+      { product: findProd('SKU-ELEC-010'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 5, title: 'OLED changed how I watch TV', body: 'Came from a QLED and the contrast difference is shocking. Perfect blacks make HDR content look insane. Gaming at 4K 120fps on PS5 is butter smooth.', helpful: 41 },
+      { product: findProd('SKU-ELEC-010'), user: findUser('david@gmail.com'), userName: findName('david@gmail.com'), rating: 4, title: 'Stunning picture, so-so sound', body: 'Picture quality is beyond compare but built-in speakers sound thin. Recommend pairing with a soundbar. Otherwise 5 stars.', helpful: 16 },
       // Apple Watch Series 9
-      { product: findProd('SKU-ELEC-009'), user: findUser('jane@gmail.com'),     userName: findName('jane@gmail.com'),     rating: 5, title: 'My favorite wearable by far',   body: 'Double Tap is genuinely useful. Health tracking is accurate and the always-on display is bright. Battery consistent at 18 hrs.', helpful: 22 },
+      { product: findProd('SKU-ELEC-009'), user: findUser('jane@gmail.com'), userName: findName('jane@gmail.com'), rating: 5, title: 'My favorite wearable by far', body: 'Double Tap is genuinely useful. Health tracking is accurate and the always-on display is bright. Battery consistent at 18 hrs.', helpful: 22 },
       // Logitech MX Master 3S
-      { product: findProd('SKU-ELEC-011'), user: findUser('david@gmail.com'),    userName: findName('david@gmail.com'),    rating: 5, title: 'The only mouse you will ever need', body: 'Used this for 8 months across Mac and Windows. MagSpeed wheel is the best feature — silent and precise. The side scroll wheel is underrated.', helpful: 33 },
+      { product: findProd('SKU-ELEC-011'), user: findUser('david@gmail.com'), userName: findName('david@gmail.com'), rating: 5, title: 'The only mouse you will ever need', body: 'Used this for 8 months across Mac and Windows. MagSpeed wheel is the best feature — silent and precise. The side scroll wheel is underrated.', helpful: 33 },
       // GoPro HERO12
-      { product: findProd('SKU-ELEC-012'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 5, title: 'Incredible stabilization',        body: 'HyperSmooth 6.0 is witchcraft. Mounted on my mountain bike helmet and footage is cinema-smooth. Bring a spare battery though.', helpful: 18 },
+      { product: findProd('SKU-ELEC-012'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 5, title: 'Incredible stabilization', body: 'HyperSmooth 6.0 is witchcraft. Mounted on my mountain bike helmet and footage is cinema-smooth. Bring a spare battery though.', helpful: 18 },
       // Nike Air Force 1
-      { product: findProd('SKU-CLOTH-001'), user: findUser('jane@gmail.com'),    userName: findName('jane@gmail.com'),     rating: 5, title: 'A classic for a reason',         body: 'My 5th pair of Air Force 1s. Triple white colorway goes with everything. Sizing was true to form. Very happy.', helpful: 35 },
-      { product: findProd('SKU-CLOTH-001'), user: findUser('customer@gmail.com'),userName: findName('customer@gmail.com'), rating: 4, title: 'Comfortable but creases quickly', body: 'Love the silhouette and comfort. The leather creases after a few wears though. Minor issue at this price point.', helpful: 9 },
+      { product: findProd('SKU-CLOTH-001'), user: findUser('jane@gmail.com'), userName: findName('jane@gmail.com'), rating: 5, title: 'A classic for a reason', body: 'My 5th pair of Air Force 1s. Triple white colorway goes with everything. Sizing was true to form. Very happy.', helpful: 35 },
+      { product: findProd('SKU-CLOTH-001'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 4, title: 'Comfortable but creases quickly', body: 'Love the silhouette and comfort. The leather creases after a few wears though. Minor issue at this price point.', helpful: 9 },
       // Nike Tech Fleece Hoodie
-      { product: findProd('SKU-CLOTH-002'), user: findUser('jane@gmail.com'),    userName: findName('jane@gmail.com'),     rating: 5, title: 'Worth the premium price',        body: 'Third Nike Tech Fleece hoodie. Warm but not heavy. Carbon Heather is the color to get. Wash inside out to keep the color.', helpful: 12 },
-      { product: findProd('SKU-CLOTH-002'), user: findUser('customer@gmail.com'),userName: findName('customer@gmail.com'), rating: 3, title: 'Quality good, sizing runs small', body: 'Fabric and finish are premium. I normally wear a Medium and this fits like a Small. Size up for a relaxed fit.', helpful: 5 },
+      { product: findProd('SKU-CLOTH-002'), user: findUser('jane@gmail.com'), userName: findName('jane@gmail.com'), rating: 5, title: 'Worth the premium price', body: 'Third Nike Tech Fleece hoodie. Warm but not heavy. Carbon Heather is the color to get. Wash inside out to keep the color.', helpful: 12 },
+      { product: findProd('SKU-CLOTH-002'), user: findUser('customer@gmail.com'), userName: findName('customer@gmail.com'), rating: 3, title: 'Quality good, sizing runs small', body: 'Fabric and finish are premium. I normally wear a Medium and this fits like a Small. Size up for a relaxed fit.', helpful: 5 },
       // Adidas Ultraboost 23
-      { product: findProd('SKU-CLOTH-004'), user: findUser('david@gmail.com'),   userName: findName('david@gmail.com'),    rating: 5, title: 'Best running shoes I have owned', body: 'Run 30+ miles a week and the Ultraboost 23 is the most comfortable shoe I have put on my feet. Sizing runs slightly narrow.', helpful: 28 },
+      { product: findProd('SKU-CLOTH-004'), user: findUser('david@gmail.com'), userName: findName('david@gmail.com'), rating: 5, title: 'Best running shoes I have owned', body: 'Run 30+ miles a week and the Ultraboost 23 is the most comfortable shoe I have put on my feet. Sizing runs slightly narrow.', helpful: 28 },
       // iPad Pro 12.9 M2
-      { product: findProd('SKU-ELEC-008'), user: findUser('jane@gmail.com'),     userName: findName('jane@gmail.com'),     rating: 5, title: 'Replaced my laptop for drawing',  body: 'As an illustrator, the ProMotion display with Apple Pencil 2 is unmatched. Zero latency, perfect palm rejection.', helpful: 26 },
+      { product: findProd('SKU-ELEC-008'), user: findUser('jane@gmail.com'), userName: findName('jane@gmail.com'), rating: 5, title: 'Replaced my laptop for drawing', body: 'As an illustrator, the ProMotion display with Apple Pencil 2 is unmatched. Zero latency, perfect palm rejection.', helpful: 26 },
       // Dell XPS 15
-      { product: findProd('SKU-ELEC-007'), user: findUser('david@gmail.com'),    userName: findName('david@gmail.com'),    rating: 4, title: 'Best Windows laptop I have used',  body: 'OLED display is stunning for photo editing. RTX 4060 handles all 3D workloads. Fan noise under sustained load is louder than expected though.', helpful: 14 },
+      { product: findProd('SKU-ELEC-007'), user: findUser('david@gmail.com'), userName: findName('david@gmail.com'), rating: 4, title: 'Best Windows laptop I have used', body: 'OLED display is stunning for photo editing. RTX 4060 handles all 3D workloads. Fan noise under sustained load is louder than expected though.', helpful: 14 },
     ];
 
     const validReviews = reviewsData.filter(r => r.product && r.user);
