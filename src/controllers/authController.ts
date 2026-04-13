@@ -162,7 +162,7 @@ export default function (appRouter: Router) {
         try {
           await sendEmail({
             email: user.email,
-            subject: 'Verify your E-Commerce Account',
+            subject: 'Verify your NAGA Shop Account',
             message: `Your OTP is: ${otp}. It will expire in 10 minutes.`,
             html: getOtpEmailTemplate(otp)
           });
@@ -312,7 +312,7 @@ export default function (appRouter: Router) {
       try {
         await sendEmail({
           email: user.email,
-          subject: 'Verify your E-Commerce Account',
+          subject: 'Verify your NAGA Shop Account',
           message: `Your new OTP is: ${otp}. It will expire in 10 minutes.`,
           html: getOtpEmailTemplate(otp)
         });

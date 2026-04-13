@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:developer.payway.com.kh)"
+      "WebFetch(domain:developer.payway.com.kh)",
+      "Bash(ipconfig)"
     ]
   }
 }

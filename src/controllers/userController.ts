@@ -268,7 +268,7 @@ export default function (appRouter: Router) {
             try {
                 await sendEmail({
                     email: user.email,
-                    subject: 'Your Password Change Verification Code – Makara Shop',
+                    subject: 'Your Password Change Verification Code – NAGA Shop',
                     message: `Your password change verification code is: ${otp}. It will expire in 10 minutes.`,
                     html: getPasswordChangeOtpEmailTemplate(otp)
                 });

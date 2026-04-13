@@ -7,7 +7,7 @@ export const getPasswordChangeOtpEmailTemplate = (otp: string): string => {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Password Change Request – Makara Shop</title>
+  <title>Password Change Request – NAGA Shop</title>
   <style>
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
@@ -46,7 +46,7 @@ export const getPasswordChangeOtpEmailTemplate = (otp: string): string => {
   <div class="wrapper">
     <div class="container">
       <div class="header-band">
-        <p class="brand-name">Makara</p>
+        <p class="brand-name">NAGA</p>
         <p class="brand-tagline">Shop</p>
         <div class="gold-line"></div>
       </div>
@@ -54,7 +54,7 @@ export const getPasswordChangeOtpEmailTemplate = (otp: string): string => {
         <p class="email-label">Security Alert</p>
         <h1 class="email-heading">Password Change Request</h1>
         <p class="email-body">
-          We received a request to change the password for your Makara Shop account. Use the verification code below to authorise this action. The code is valid for <strong>10 minutes</strong>.
+          We received a request to change the password for your NAGA Shop account. Use the verification code below to authorise this action. The code is valid for <strong>10 minutes</strong>.
         </p>
         <div class="otp-section">
           <p class="otp-label">Your Verification Code</p>
@@ -69,10 +69,10 @@ export const getPasswordChangeOtpEmailTemplate = (otp: string): string => {
         </div>
       </div>
       <div class="footer">
-        <p class="footer-brand">Makara Shop</p>
+        <p class="footer-brand">NAGA Shop</p>
         <p class="footer-copy">
           Premium E-Commerce Experience<br>
-          &copy; ${year} Makara Shop. All rights reserved.
+          &copy; ${year} NAGA Shop. All rights reserved.
         </p>
       </div>
     </div>
@@ -91,7 +91,7 @@ export const getOtpEmailTemplate = (otp: string): string => {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Verify Your Identity – Makara Shop</title>
+  <title>Verify Your Identity – NAGA Shop</title>
   <style>
     /* Base Reset */
     body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
@@ -261,7 +261,7 @@ export const getOtpEmailTemplate = (otp: string): string => {
 
       <!-- Header -->
       <div class="header-band">
-        <p class="brand-name">Makara</p>
+        <p class="brand-name">NAGA</p>
         <p class="brand-tagline">Shop</p>
         <div class="gold-line"></div>
       </div>
@@ -271,7 +271,7 @@ export const getOtpEmailTemplate = (otp: string): string => {
         <p class="email-label">Account Verification</p>
         <h1 class="email-heading">Confirm Your Identity</h1>
         <p class="email-body">
-          You recently requested to create an account with Makara Shop. To complete your registration and secure your account, please use the one-time verification code below.
+          You recently requested to create an account with NAGA Shop. To complete your registration and secure your account, please use the one-time verification code below.
         </p>
 
         <!-- OTP Box -->
@@ -293,10 +293,10 @@ export const getOtpEmailTemplate = (otp: string): string => {
 
       <!-- Footer -->
       <div class="footer">
-        <p class="footer-brand">Makara Shop</p>
+        <p class="footer-brand">NAGA Shop</p>
         <p class="footer-copy">
           Premium E-Commerce Experience<br>
-          &copy; ${year} Makara Shop. All rights reserved.
+          &copy; ${year} NAGA Shop. All rights reserved.
         </p>
       </div>
 
