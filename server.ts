@@ -1,9 +1,4 @@
 import 'dotenv/config';
-import dns from 'dns';
-
-// Force IPv4 for all DNS lookups — Render does not support IPv6 outbound connections
-dns.setDefaultResultOrder('ipv4first');
-
 import express from 'express';
 import cors from 'cors';
 import connectDB from './src/config/db';

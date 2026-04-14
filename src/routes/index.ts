@@ -66,6 +66,12 @@ appRouter.get('/api-docs.json', async (req, res) => {
     res.end(JSON.stringify(swaggerSpec));
 });
 
+// Redirect /swagger to /api-docs
+appRouter.get('/swagger', async (req, res) => {
+    res.writeHead(301, { Location: '/api-docs' });
+    res.end();
+});
+
 // Swagger UI using CDN
 appRouter.get('/api-docs', async (req, res) => {
     const html = `

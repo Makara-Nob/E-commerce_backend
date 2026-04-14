@@ -14,9 +14,6 @@ export const sendEmail = async (options: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
         },
-        connectionTimeout: 10000, // 10s to establish connection
-        greetingTimeout: 10000,   // 10s to get SMTP greeting
-        socketTimeout: 15000,     // 15s of inactivity before giving up
     });
 
     const info = await transporter.sendMail({
