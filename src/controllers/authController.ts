@@ -175,18 +175,13 @@ export default function (appRouter: Router) {
       await PendingRegistration.findOneAndDelete({ $or: [{ email }, { username }] });
       await PendingRegistration.create({ username, email, password, firstName, lastName, otp, otpExpiresAt });
 
-      // Send OTP email — await so we can surface failures to the caller
-      try {
-        await sendEmail({
-          email,
-          subject: 'Verify your NAGA Shop Account',
-          message: `Your OTP is: ${otp}. It will expire in 10 minutes.`,
-          html: getOtpEmailTemplate(otp)
-        });
-      } catch (emailError) {
-        console.error('Failed to send OTP email:', emailError);
-        // Registration record is saved; user can resend via /resend-otp
-      }
+      // Send OTP email in background — do not block the API response
+      sendEmail({
+        email,
+        subject: 'Verify your NAGA Shop Account',
+        message: `Your OTP is: ${otp}. It will expire in 10 minutes.`,
+        html: getOtpEmailTemplate(otp)
+      }).catch(err => console.error('OTP email failed:', err));
 
       return appRouter.sendResponse(res, 201, {
         message: "Registration initiated. Please check your email for the OTP code.",
@@ -370,17 +365,13 @@ export default function (appRouter: Router) {
         await user.save();
       }
 
-      try {
-        await sendEmail({
-          email,
-          subject: 'Verify your NAGA Shop Account',
-          message: `Your new OTP is: ${otp}. It will expire in 10 minutes.`,
-          html: getOtpEmailTemplate(otp)
-        });
-      } catch (emailError) {
-        console.error('Failed to resend OTP email:', emailError);
-        return appRouter.sendResponse(res, 500, { message: "Failed to send OTP email. Please try again." });
-      }
+      // Send OTP email in background — do not block the API response
+      sendEmail({
+        email,
+        subject: 'Verify your NAGA Shop Account',
+        message: `Your new OTP is: ${otp}. It will expire in 10 minutes.`,
+        html: getOtpEmailTemplate(otp)
+      }).catch(err => console.error('Resend OTP email failed:', err));
 
       appRouter.sendResponse(res, 200, { message: "OTP resent successfully" });
     } catch (e: any) {
