@@ -1,4 +1,5 @@
 import User, { IUser } from "../models/User";
+import PendingRegistration from "../models/PendingRegistration";
 import { generateToken, protect } from "../utils/authPlugin";
 import { Router } from "../utils/Router";
 import { IncomingMessage, ServerResponse } from "http";
@@ -158,7 +159,7 @@ export default function (appRouter: Router) {
         });
       }
 
-      // Check if user already exists
+      // Check if a verified user already exists
       const userExists = await User.findOne({ $or: [{ email }, { username }] });
       if (userExists) {
         return appRouter.sendResponse(res, 400, {
@@ -168,43 +169,29 @@ export default function (appRouter: Router) {
 
       // Generate 6-digit OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+      const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-      // Create new user with CUSTOMER role
-      const user = await User.create({
-        username,
-        email,
-        password, // Password hashing is handled by the Mongoose pre-save hook
-        firstName,
-        lastName,
-        position: null,
-        status: 'INACTIVE', // Important: keep inactive until OTP is verified
-        userPermission: 'PENDING',
-        roles: ['CUSTOMER'],
-        otp,
-        otpExpiresAt
-      });
+      // Replace any existing pending registration for this email/username
+      await PendingRegistration.findOneAndDelete({ $or: [{ email }, { username }] });
+      await PendingRegistration.create({ username, email, password, firstName, lastName, otp, otpExpiresAt });
 
-      if (user) {
-        // Send email asynchronously so it doesn't block the API response
-        try {
-          sendEmail({
-            email: user.email,
-            subject: 'Verify your NAGA Shop Account',
-            message: `Your OTP is: ${otp}. It will expire in 10 minutes.`,
-            html: getOtpEmailTemplate(otp)
-          }).catch(err => console.error('Email failed to send (background):', err));
-        } catch (error) {
-          console.error('Email trigger failed', error);
-        }
-
-        appRouter.sendResponse(res, 201, {
-          message: "Registration successful. Please check your email for the OTP code.",
-          email: user.email
+      // Send OTP email — await so we can surface failures to the caller
+      try {
+        await sendEmail({
+          email,
+          subject: 'Verify your NAGA Shop Account',
+          message: `Your OTP is: ${otp}. It will expire in 10 minutes.`,
+          html: getOtpEmailTemplate(otp)
         });
-      } else {
-        appRouter.sendResponse(res, 400, { message: "Invalid user data" });
+      } catch (emailError) {
+        console.error('Failed to send OTP email:', emailError);
+        // Registration record is saved; user can resend via /resend-otp
       }
+
+      return appRouter.sendResponse(res, 201, {
+        message: "Registration initiated. Please check your email for the OTP code.",
+        email
+      });
     } catch (e: any) {
       console.error(e);
       appRouter.sendResponse(res, 500, { message: e.message || "Server Error" });
@@ -245,13 +232,56 @@ export default function (appRouter: Router) {
         return appRouter.sendResponse(res, 400, { message: "Please provide email and otp" });
       }
 
+      // --- New flow: verify against PendingRegistration, then create the User ---
+      const pending = await PendingRegistration.findOne({ email });
+
+      if (pending) {
+        if (pending.otp !== otp || pending.otpExpiresAt < new Date()) {
+          return appRouter.sendResponse(res, 400, { message: "Invalid or expired OTP" });
+        }
+
+        // OTP is valid — create the verified user now
+        const user = await User.create({
+          username: pending.username,
+          email: pending.email,
+          password: pending.password,
+          firstName: pending.firstName,
+          lastName: pending.lastName,
+          position: null,
+          status: 'ACTIVE',
+          userPermission: 'APPROVED',
+          roles: ['CUSTOMER'],
+        });
+
+        // Clean up the pending record
+        await PendingRegistration.findByIdAndDelete(pending._id);
+
+        return appRouter.sendResponse(res, 200, {
+          token: generateToken(user._id, user.roles),
+          user: {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.roles && user.roles.length > 0 ? user.roles[0] : 'CUSTOMER',
+            active: true,
+            position: user.position,
+            status: user.status,
+            userPermission: user.userPermission,
+            roles: user.roles,
+          },
+        });
+      }
+
+      // --- Legacy fallback: handle INACTIVE users created by the old flow ---
       const user = await User.findOne({ email });
 
       if (!user) {
         return appRouter.sendResponse(res, 404, { message: "User not found" });
       }
 
-      if (user.status === 'ACTIVE' && user.userPermission !== 'PENDING') {
+      if (user.status === 'ACTIVE') {
         return appRouter.sendResponse(res, 400, { message: "User already verified" });
       }
 
@@ -259,14 +289,13 @@ export default function (appRouter: Router) {
         return appRouter.sendResponse(res, 400, { message: "Invalid or expired OTP" });
       }
 
-      // Mark user as active and clear OTP
       user.status = 'ACTIVE';
       user.userPermission = 'APPROVED';
       user.otp = undefined;
       user.otpExpiresAt = undefined;
       await user.save();
 
-      appRouter.sendResponse(res, 200, {
+      return appRouter.sendResponse(res, 200, {
         token: generateToken(user._id, user.roles),
         user: {
           id: user._id,
@@ -317,35 +346,40 @@ export default function (appRouter: Router) {
         return appRouter.sendResponse(res, 400, { message: "Please provide an email" });
       }
 
-      const user = await User.findOne({ email });
-
-      if (!user) {
-        return appRouter.sendResponse(res, 404, { message: "User not found" });
-      }
-
-      if (user.status === 'ACTIVE' && user.userPermission !== 'PENDING') {
-        return appRouter.sendResponse(res, 400, { message: "User already verified" });
-      }
-
-      // Generate new OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-      user.otp = otp;
-      user.otpExpiresAt = otpExpiresAt;
-      await user.save();
+      // Check PendingRegistration first (new flow)
+      const pending = await PendingRegistration.findOne({ email });
 
-      // Send email asynchronously
+      if (pending) {
+        pending.otp = otp;
+        pending.otpExpiresAt = otpExpiresAt;
+        await pending.save();
+      } else {
+        // Legacy fallback: INACTIVE user from old flow
+        const user = await User.findOne({ email });
+        if (!user) {
+          return appRouter.sendResponse(res, 404, { message: "User not found" });
+        }
+        if (user.status === 'ACTIVE') {
+          return appRouter.sendResponse(res, 400, { message: "User already verified" });
+        }
+        user.otp = otp;
+        user.otpExpiresAt = otpExpiresAt;
+        await user.save();
+      }
+
       try {
-        sendEmail({
-          email: user.email,
+        await sendEmail({
+          email,
           subject: 'Verify your NAGA Shop Account',
           message: `Your new OTP is: ${otp}. It will expire in 10 minutes.`,
           html: getOtpEmailTemplate(otp)
-        }).catch(err => console.error('Background email error:', err));
-      } catch (error) {
-        console.error('Email trigger failed', error);
-        return appRouter.sendResponse(res, 500, { message: "Could not trigger email sending process" });
+        });
+      } catch (emailError) {
+        console.error('Failed to resend OTP email:', emailError);
+        return appRouter.sendResponse(res, 500, { message: "Failed to send OTP email. Please try again." });
       }
 
       appRouter.sendResponse(res, 200, { message: "OTP resent successfully" });

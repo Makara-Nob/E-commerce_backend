@@ -5,7 +5,8 @@
       "Bash(ipconfig)",
       "Bash(npm run:*)",
       "Bash(flutter pub:*)",
-      "Bash(dart run:*)"
+      "Bash(dart run:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
