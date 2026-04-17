@@ -17,6 +17,36 @@ const runMiddleware = (req: any, res: any, fn: any) => {
 };
 
 export default function(appRouter: Router) {
+  // @desc    Upload a file (any authenticated user)
+  // @route   POST /api/v1/files/upload
+  // @access  Private
+  appRouter.post('/api/v1/files/upload', async (req: IncomingMessage, res: ServerResponse) => {
+    try {
+      const userId = await protect(req, res, appRouter);
+      if (!userId) return;
+
+      const uploadSingle = upload.single('file');
+      try {
+        await runMiddleware(req, res, uploadSingle);
+      } catch (err: any) {
+        return appRouter.sendResponse(res, 400, { message: err.message });
+      }
+
+      const fileReq = req as any;
+      if (!fileReq.file) {
+        return appRouter.sendResponse(res, 400, { message: 'Please upload a file' });
+      }
+
+      const fileUrl = `/uploads/${fileReq.file.filename}`;
+      appRouter.sendResponse(res, 200, {
+        message: 'File uploaded successfully',
+        url: fileUrl
+      });
+    } catch (e) {
+      appRouter.sendResponse(res, 500, { message: 'Server Error' });
+    }
+  });
+
   /**
    * @swagger
    * /api/v1/admin/files/upload:
