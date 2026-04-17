@@ -1,10 +1,10 @@
 import { Promotion } from "../models/Promotion";
 import { Product } from "../models/Product";
 import User from "../models/User";
-import Notification from "../models/Notification";
 import { Router } from "../utils/Router";
 import { IncomingMessage, ServerResponse } from "http";
 import { protect, admin } from "../utils/authPlugin";
+import { sendPushNotification } from "../utils/fcmService";
 
 export default function (appRouter: Router) {
     // @desc    Create a promotion and notify wishlist users
@@ -153,27 +153,26 @@ export default function (appRouter: Router) {
         }
     });
 
-    // Helper function to notify users
+    // Helper function to notify users via FCM push + DB record
     async function notifyWishlistUsers(productId: number, productName: string, promotion: any) {
         try {
             const users = await User.find({ wishlist: productId });
-            
             if (users.length === 0) return;
 
-            const notifications = users.map(user => ({
-                userId: user._id,
-                title: "Wishlist Item on Promotion!",
-                body: `Exclusive offer! "${productName}" is now featured in our "${promotion.name}" promotion. Don't miss out!`,
-                data: {
-                    type: "PROMOTION",
-                    productId: productId,
-                    promotionId: promotion._id,
-                    discountType: promotion.discountType,
-                    discountValue: promotion.discountValue
-                }
-            }));
+            const title = "Wishlist Item on Promotion!";
+            const body = `Exclusive offer! "${productName}" is now in "${promotion.name}". Don't miss out!`;
+            const data = {
+                type: "PROMOTION",
+                productId: String(productId),
+                promotionId: String(promotion._id),
+                discountType: String(promotion.discountType),
+                discountValue: String(promotion.discountValue),
+            };
 
-            await Notification.insertMany(notifications);
+            // sendPushNotification saves to DB and sends FCM for each user
+            await Promise.all(
+                users.map(user => sendPushNotification(user._id as any, title, body, data))
+            );
         } catch (error) {
             console.error("Failed to send wishlist notifications:", error);
         }
